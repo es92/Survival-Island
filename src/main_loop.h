@@ -2,5 +2,5 @@
 
 const int MILLIS_PER_UPDATE = 10;
 
-void init();
+bool init();
 void main_loop();

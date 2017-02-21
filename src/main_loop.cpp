@@ -1,4 +1,6 @@
 
+
+#include <GL/glew.h>
 #include "main_loop.h"
 #include <GL/glut.h>
 #include "state.h"
@@ -21,10 +23,6 @@ std::set<int> down_mouse_buttons;
 
 // ==========================================================
 
-void init(void) {
-
-}
-
 void main_loop() {
   const long t = epoch_millis();
   if (state.last_update_time == -1){
@@ -45,20 +43,35 @@ void main_loop() {
 // ==========================================================
 
 void step() {
+
   process_events();
 
   if (down_special_keys.find(GLUT_KEY_UP) != down_special_keys.end()) {
-    render_state.theta[0] -= 0.5;
+    render_state.angle -= 45*MILLIS_PER_UPDATE/1000.;
   }
   if (down_special_keys.find(GLUT_KEY_DOWN) != down_special_keys.end()) {
-    render_state.theta[0] += 0.5;
+    render_state.angle += 45*MILLIS_PER_UPDATE/1000.;
   }
   if (down_special_keys.find(GLUT_KEY_RIGHT) != down_special_keys.end()) {
-    render_state.theta[1] += 0.5;
+    render_state.angle += 45*MILLIS_PER_UPDATE/1000.;
   }
   if (down_special_keys.find(GLUT_KEY_LEFT) != down_special_keys.end()) {
-    render_state.theta[1] -= 0.5;
+    render_state.angle -= 45*MILLIS_PER_UPDATE/1000.;
   }
+
+  render_state.angle += 5*MILLIS_PER_UPDATE/1000.;
+
+  glm::vec3 axis_y(0, 1, 0);
+  glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -4.0));
+  glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+  glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 10.0f);
+
+  glm::mat4 mvp = projection * view * model * anim;
+
+  glUseProgram(render_state.program);
+  glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 }
 
 void process_events() {
@@ -104,16 +117,111 @@ void process_event(Event* e) {
   // ==============================================================
   } else if (e->type() == Events::Reshape) {
     Reshape_Event* re = static_cast<Reshape_Event*>(e);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    if( re->w <= re->h){
-      glOrtho( -2.0, 2.0, -2.0*((GLfloat)re->h/(GLfloat)re->w), 2.0*((GLfloat)re->h/(GLfloat)re->w), -10.0, 10.0);
-    } else {
-      glOrtho( -2.0*((GLfloat)re->w/(GLfloat)re->h), 2.0*((GLfloat)re->w/(GLfloat)re->h), -2.0, 2.0, -10.0, 10.0);
-    }
-    glMatrixMode(GL_MODELVIEW);  
+
+    render_state.screen_width = re->w;
+    render_state.screen_height = re->h;
+    glViewport(0, 0, render_state.screen_width, render_state.screen_height);
+
   // ==============================================================
   } else {
     cout << "dropped event" << e->type() << endl;
   }
+}
+
+bool init() {
+  GLfloat cube_vertices[] = {
+    // front
+    -1.0, -1.0,  1.0,
+     1.0, -1.0,  1.0,
+     1.0,  1.0,  1.0,
+    -1.0,  1.0,  1.0,
+    // back
+    -1.0, -1.0, -1.0,
+     1.0, -1.0, -1.0,
+     1.0,  1.0, -1.0,
+    -1.0,  1.0, -1.0,
+  };
+  glGenBuffers(1, &render_state.vbo_cube_vertices);
+  glBindBuffer(GL_ARRAY_BUFFER, render_state.vbo_cube_vertices);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+  GLfloat cube_colors[] = {
+    // front colors
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0,
+    1.0, 1.0, 1.0,
+    // back colors
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0,
+    1.0, 1.0, 1.0,
+  };
+  glGenBuffers(1, &render_state.vbo_cube_colors);
+  glBindBuffer(GL_ARRAY_BUFFER, render_state.vbo_cube_colors);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cube_colors), cube_colors, GL_STATIC_DRAW);
+
+  GLushort cube_elements[] = {
+    // front
+    0, 1, 2,
+    2, 3, 0,
+    // top
+    1, 5, 6,
+    6, 2, 1,
+    // back
+    7, 6, 5,
+    5, 4, 7,
+    // bottom
+    4, 0, 3,
+    3, 7, 4,
+    // left
+    4, 5, 1,
+    1, 0, 4,
+    // right
+    3, 2, 6,
+    6, 7, 3,
+  };
+  glGenBuffers(1, &render_state.ibo_cube_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_state.ibo_cube_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
+
+  GLint link_ok = GL_FALSE;
+
+  GLuint vs, fs;
+  if ((vs = create_shader("../glsl/cube.v.glsl", GL_VERTEX_SHADER))   == 0) return false;
+  if ((fs = create_shader("../glsl/cube.f.glsl", GL_FRAGMENT_SHADER)) == 0) return false;
+
+  render_state.program = glCreateProgram();
+  glAttachShader(render_state.program, vs);
+  glAttachShader(render_state.program, fs);
+  glLinkProgram(render_state.program);
+  glGetProgramiv(render_state.program, GL_LINK_STATUS, &link_ok);
+  if (!link_ok) {
+    cerr << "glLinkProgram:";
+    print_log(render_state.program);
+    return false;
+  }
+
+  const char* attribute_name;
+  attribute_name = "coord3d";
+  render_state.attribute_coord3d = glGetAttribLocation(render_state.program, attribute_name);
+  if (render_state.attribute_coord3d == -1) {
+    cerr << "Could not bind attribute " << attribute_name << endl;
+    return false;
+  }
+  attribute_name = "v_color";
+  render_state.attribute_v_color = glGetAttribLocation(render_state.program, attribute_name);
+  if (render_state.attribute_v_color == -1) {
+    cerr << "Could not bind attribute " << attribute_name << endl;
+    return false;
+  }
+  const char* uniform_name;
+  uniform_name = "mvp";
+  render_state.uniform_mvp = glGetUniformLocation(render_state.program, uniform_name);
+  if (render_state.uniform_mvp == -1) {
+    cerr << "Could not bind uniform " << uniform_name << endl;
+    return false;
+  }
+
+  return true;
 }

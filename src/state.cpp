@@ -1,6 +1,9 @@
 
-#include "state.h"
+
+#include <GL/glew.h>
 #include <GL/glut.h>
+
+#include "state.h"
 
 State state = {
   .last_update_time = -1,
@@ -8,7 +11,10 @@ State state = {
 };
 
 Render_State render_state = {
-  .theta = { 0.0, 0.0, 0.0 },
+  .angle = 0,
+  .screen_width = 800,
+  .screen_height = 600,
 };
 
 Display_Info display_info = { };
+

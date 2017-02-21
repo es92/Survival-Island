@@ -26,6 +26,17 @@ if(NOT OPENGL_FOUND)
 endif(NOT OPENGL_FOUND)
 
 #==================================================
+# Find GLEW
+#==================================================
+
+find_package(GLEW REQUIRED)
+include_directories(${GLEW_INCLUDE_DIRS})
+link_libraries(${GLEW_LIBRARIES})
+if(NOT GLEW_FOUND)
+    message(ERROR " GLEW not found!")
+endif(NOT GLEW_FOUND)
+
+#==================================================
 # Include Files
 #==================================================
 add_executable(my_game 
@@ -35,6 +46,7 @@ add_executable(my_game
                         ../src/utils.cpp 
                         ../src/state.cpp
                         ../src/events.cpp
+                        ../src/shader_utils.cpp 
               )
 #==================================================
 # Linking
