@@ -24,42 +24,52 @@ void display(void) {
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(render_state.program);
-  glEnableVertexAttribArray(render_state.attribute_coord3d);
-  // Describe our vertices array to OpenGL (it can't guess its format automatically)
-  glBindBuffer(GL_ARRAY_BUFFER, render_state.vbo_cube_vertices);
-  glVertexAttribPointer(
-    render_state.attribute_coord3d, // attribute
-    3,                 // number of elements per vertex, here (x,y,z)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    0,                 // no extra data between each position
-    0                  // offset of first element
-  );
 
-  glEnableVertexAttribArray(render_state.attribute_v_color);
-  glBindBuffer(GL_ARRAY_BUFFER, render_state.vbo_cube_colors);
-  glVertexAttribPointer(
-    render_state.attribute_v_color, // attribute
-    3,                 // number of elements per vertex, here (R,G,B)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    0,                 // no extra data between each position
-    0                  // offset of first element
-  );
+  {
+    glm::vec3 axis_y(1, 0, 0);
+    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-3, -2.0, -8.0));
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 100.0f);
 
-  /* Push each element in buffer_vertices to the vertex shader */
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_state.ibo_cube_elements);
-  int size;  glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-  glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    glm::mat4 mvp = projection * view * model * anim;
+    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
-  glDisableVertexAttribArray(render_state.attribute_coord3d);
-  glDisableVertexAttribArray(render_state.attribute_v_color);
+    draw_cube(render_state.cube);
+  }
+
+  {
+    glm::vec3 axis_y(0, 1, 0);
+    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -2.0, -8.0));
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 100.0f);
+
+    glm::mat4 mvp = projection * view * model * anim;
+    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+
+    draw_cube(render_state.cube);
+  }
+
+  {
+    glm::vec3 axis_y(0, 0, 1);
+    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(3, -2.0, -8.0));
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 100.0f);
+
+    glm::mat4 mvp = projection * view * model * anim;
+    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+
+    draw_cube(render_state.cube);
+  }
+
   glutSwapBuffers();
 }
 
 void free_resources() {
   glDeleteProgram(render_state.program);
-  glDeleteBuffers(1, &render_state.vbo_cube_vertices);
-  glDeleteBuffers(1, &render_state.vbo_cube_colors);
-  glDeleteBuffers(1, &render_state.ibo_cube_elements);
+  glDeleteBuffers(1, &render_state.cube.vbo_cube_vertices);
+  glDeleteBuffers(1, &render_state.cube.vbo_cube_colors);
+  glDeleteBuffers(1, &render_state.cube.ibo_cube_elements);
 }

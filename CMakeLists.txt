@@ -47,6 +47,8 @@ add_executable(my_game
                         ../src/state.cpp
                         ../src/events.cpp
                         ../src/shader_utils.cpp 
+
+                        ../src/cube.cpp 
               )
 #==================================================
 # Linking

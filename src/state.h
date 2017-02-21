@@ -1,6 +1,7 @@
 
 #include <GL/glut.h>
 #include <vector>
+#include "cube.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -24,13 +25,10 @@ typedef struct Render_State_ {
   int screen_width;
   int screen_height;
   GLuint program;
+
   GLint uniform_mvp;
 
-  GLuint vbo_cube_vertices;
-  GLuint vbo_cube_colors;
-  GLuint ibo_cube_elements;
-  GLint attribute_coord3d;
-  GLint attribute_v_color;
+  Cube cube;
 
 } Render_State;
 
