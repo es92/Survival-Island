@@ -14,6 +14,11 @@ const int DISPLAY_TIMES_LEN = 100;
 typedef struct State_ {
   long last_update_time;
   long queued_runtime;
+
+  bool lock_pointer;
+
+  int last_drag_x;
+  int last_drag_y;
 } State;
 
 typedef struct Display_Info_ {
@@ -29,6 +34,13 @@ typedef struct Render_State_ {
   GLint uniform_mvp;
 
   Cube cube;
+
+  float player_rx;
+  float player_ry;
+  float player_rz;
+  float player_x;
+  float player_y;
+  float player_z;
 
 } Render_State;
 

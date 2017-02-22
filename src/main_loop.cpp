@@ -60,6 +60,28 @@ void step() {
   }
 
   render_state.angle += 5*MILLIS_PER_UPDATE/1000.;
+
+  float walking_speed = 8;
+
+  float cos_ang = cos(render_state.player_ry/180*M_PI);
+  float sin_ang = sin(render_state.player_ry/180*M_PI);
+
+  if (down_keys.find('a') != down_keys.end()) {
+    render_state.player_x += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+  }
+  if (down_keys.find('s') != down_keys.end()) {
+    render_state.player_x -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+  }
+  if (down_keys.find('w') != down_keys.end()) {
+    render_state.player_x -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+  }
+  if (down_keys.find('r') != down_keys.end()) {
+    render_state.player_x += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+  }
 }
 
 void process_events() {
@@ -69,6 +91,27 @@ void process_events() {
     process_event(e);
     delete e;
   }
+}
+
+void trap_mouse(int x, int y) {
+  if (!state.lock_pointer){
+    return;
+  }
+  if (state.last_drag_x != -1){
+    int diff_x = x - state.last_drag_x;
+    int diff_y = y - state.last_drag_y;
+
+    render_state.player_ry += diff_x/5.;
+    render_state.player_rx += diff_y/5.;
+  }
+
+  int win_w = glutGet(GLUT_WINDOW_WIDTH);
+  int win_h = glutGet(GLUT_WINDOW_HEIGHT);
+
+  state.last_drag_x = win_w/2;
+  state.last_drag_y = win_h/2;
+
+  glutWarpPointer(win_w/2, win_h/2);
 }
 
 void process_event(Event* e) {
@@ -83,13 +126,35 @@ void process_event(Event* e) {
   // ==============================================================
   } else if (e->type() == Events::Mouse_Move) {
     Mouse_Move_Event* mme = static_cast<Mouse_Move_Event*>(e);
+
+    trap_mouse(mme->x, mme->y);
+
   // ==============================================================
   } else if (e->type() == Events::Mouse_Drag) {
     Mouse_Drag_Event* mde = static_cast<Mouse_Drag_Event*>(e);
+
+    trap_mouse(mde->x, mde->y);
+
   // ==============================================================
   } else if (e->type() == Events::Key) {
     Key_Event* ke = static_cast<Key_Event*>(e);
     down_keys.insert(ke->key);
+
+    const int ESCAPE_KEY = 27;
+
+    if (ke->key == ESCAPE_KEY){
+      state.lock_pointer = !state.lock_pointer;
+      if (state.lock_pointer){
+        glutSetCursor(GLUT_CURSOR_NONE); 
+      }
+      else {
+        state.last_drag_x = -1;
+        state.last_drag_y = -1;
+        glutSetCursor(GLUT_CURSOR_INHERIT); 
+      }
+    }
+
+
   // ==============================================================
   } else if (e->type() == Events::Key_Up) {
     Key_Up_Event* ke = static_cast<Key_Up_Event*>(e);
@@ -98,6 +163,7 @@ void process_event(Event* e) {
   } else if (e->type() == Events::Special_Key) {
     Special_Key_Event* ske = static_cast<Special_Key_Event*>(e);
     down_special_keys.insert(ske->key);
+
   // ==============================================================
   } else if (e->type() == Events::Special_Key_Up) {
     Special_Key_Up_Event* ske = static_cast<Special_Key_Up_Event*>(e);

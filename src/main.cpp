@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowPosition(100, 100);
-    glutInitWindowSize(480,480);
+    glutInitWindowSize(800,600);
     glutCreateWindow("Survival Island -- dev");
 
     GLenum glew_status = glewInit();

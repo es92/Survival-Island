@@ -8,6 +8,9 @@
 State state = {
   .last_update_time = -1,
   .queued_runtime = 0,
+  .lock_pointer = false,
+  .last_drag_x = -1,
+  .last_drag_y = -1,
 };
 
 Render_State render_state = {
