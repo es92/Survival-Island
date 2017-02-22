@@ -25,8 +25,6 @@ void display(void) {
 
   glUseProgram(render_state.program);
 
-  //glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
-
   glm::mat4 view = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.player_rx), glm::vec3(1, 0, 0)) * 
                    glm::rotate(glm::mat4(1.0f), glm::radians(render_state.player_ry), glm::vec3(0, 1, 0)) * 
                    glm::rotate(glm::mat4(1.0f), glm::radians(render_state.player_rz), glm::vec3(0, 0, 1)) *
@@ -34,37 +32,19 @@ void display(void) {
 
   glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 100.0f);
 
-  {
-    glm::vec3 axis_y(1, 0, 0);
-    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-3, -2.0, -8.0));
+  for (int i = 0; i < 10; i++){
+    for (int j = 0; j < 10; j++){
+      for (int k = 0; k < 10; k++){
+        glm::vec3 axis_y(1, 0, 0);
+        glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i*3, k*3, j*3));
 
-    glm::mat4 mvp = projection * view * model * anim;
-    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+        glm::mat4 mvp = projection * view * model * anim;
+        glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
-    draw_cube(render_state.cube);
-  }
-
-  {
-    glm::vec3 axis_y(0, 1, 0);
-    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -2.0, -8.0));
-
-    glm::mat4 mvp = projection * view * model * anim;
-    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-
-    draw_cube(render_state.cube);
-  }
-
-  {
-    glm::vec3 axis_y(0, 0, 1);
-    glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(3, -2.0, -8.0));
-
-    glm::mat4 mvp = projection * view * model * anim;
-    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-
-    draw_cube(render_state.cube);
+        draw_cube(render_state.cube);
+      }
+    }
   }
 
   glutSwapBuffers();

@@ -66,21 +66,28 @@ void step() {
   float cos_ang = cos(render_state.player_ry/180*M_PI);
   float sin_ang = sin(render_state.player_ry/180*M_PI);
 
+  float sin_vert_ang = sin(render_state.player_rx/180*M_PI);
+  float cos_vert_ang = cos(render_state.player_rx/180*M_PI);
+
   if (down_keys.find('a') != down_keys.end()) {
-    render_state.player_x += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x += cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z += cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('s') != down_keys.end()) {
-    render_state.player_x -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x -= cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z -= cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('w') != down_keys.end()) {
     render_state.player_x -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
     render_state.player_z += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+
+    render_state.player_y += sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('r') != down_keys.end()) {
     render_state.player_x += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
     render_state.player_z -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+
+    render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 }
 
@@ -103,6 +110,11 @@ void trap_mouse(int x, int y) {
 
     render_state.player_ry += diff_x/5.;
     render_state.player_rx += diff_y/5.;
+
+    if (render_state.player_rx > 115)
+      render_state.player_rx = 115;
+    if (render_state.player_rx < -115)
+      render_state.player_rx = -115;
   }
 
   int win_w = glutGet(GLUT_WINDOW_WIDTH);
@@ -153,7 +165,6 @@ void process_event(Event* e) {
         glutSetCursor(GLUT_CURSOR_INHERIT); 
       }
     }
-
 
   // ==============================================================
   } else if (e->type() == Events::Key_Up) {
