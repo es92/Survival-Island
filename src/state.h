@@ -2,12 +2,15 @@
 #include <GL/glut.h>
 #include <vector>
 #include "cube.h"
+#include "chunk.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_utils.h"
+
+#include <vector>
 
 const int DISPLAY_TIMES_LEN = 100;
 
@@ -34,6 +37,7 @@ typedef struct Render_State_ {
   GLint uniform_mvp;
 
   Cube cube;
+  std::vector<Chunk> chunks;
 
   float player_rx;
   float player_ry;

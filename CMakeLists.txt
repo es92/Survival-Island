@@ -49,6 +49,7 @@ add_executable(my_game
                         ../src/shader_utils.cpp 
 
                         ../src/cube.cpp 
+                        ../src/chunk.cpp 
               )
 #==================================================
 # Linking

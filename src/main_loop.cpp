@@ -63,6 +63,10 @@ void step() {
 
   float walking_speed = 8;
 
+  if (down_keys.find('c') != down_keys.end()) {
+    walking_speed *= 10;
+  }
+
   float cos_ang = cos(render_state.player_ry/180*M_PI);
   float sin_ang = sin(render_state.player_ry/180*M_PI);
 
@@ -221,6 +225,20 @@ bool init() {
 
   if (!init_cube(render_state.cube, render_state.program)){
     return false;
+  }
+
+  int D = 8;
+
+  for (int x = 0; x < D; x++){
+    for (int y = 0; y < D; y++){
+      for (int z = 0; z < D; z++){
+        Chunk chunk;
+        if (!init_chunk(chunk, render_state.program, x*16, y*16, z*16)){
+          return false;
+        }
+        render_state.chunks.push_back(chunk);
+      }
+    }
   }
 
   return true;

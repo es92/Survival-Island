@@ -16,6 +16,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <vector>
+
 using namespace std;
 
 void display(void) {
@@ -30,21 +32,32 @@ void display(void) {
                    glm::rotate(glm::mat4(1.0f), glm::radians(render_state.player_rz), glm::vec3(0, 0, 1)) *
                    glm::translate(glm::mat4(1.0f), glm::vec3(render_state.player_x, render_state.player_y, render_state.player_z));
 
-  glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 100.0f);
+  glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 500.0f);
 
-  for (int i = 0; i < 10; i++){
-    for (int j = 0; j < 10; j++){
-      for (int k = 0; k < 10; k++){
-        glm::vec3 axis_y(1, 0, 0);
-        glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i*3, k*3, j*3));
+  //for (int i = 0; i < 20; i++){
+  //  for (int j = 0; j < 20; j++){
+  //    for (int k = 0; k < 20; k++){
+  //      glm::vec3 axis_y(1, 0, 0);
+  //      glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
+  //      glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i*3, k*3, j*3));
 
-        glm::mat4 mvp = projection * view * model * anim;
-        glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+  //      glm::mat4 mvp = projection * view * model * anim;
+  //      glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
-        draw_cube(render_state.cube);
-      }
-    }
+  //      draw_cube(render_state.cube);
+  //    }
+  //  }
+  //}
+
+  for (int i = 0; i < render_state.chunks.size(); i++){
+    Chunk chunk = render_state.chunks[i];
+    glm::vec3 axis_y(1, 0, 0);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk.x, chunk.y, chunk.z));
+
+    glm::mat4 mvp = projection * view * model;
+    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+
+    draw_chunk(chunk);
   }
 
   glutSwapBuffers();
@@ -55,4 +68,11 @@ void free_resources() {
   glDeleteBuffers(1, &render_state.cube.vbo_cube_vertices);
   glDeleteBuffers(1, &render_state.cube.vbo_cube_colors);
   glDeleteBuffers(1, &render_state.cube.ibo_cube_elements);
+
+  for (int i = 0; i < render_state.chunks.size(); i++){
+    Chunk chunk = render_state.chunks[i];
+    glDeleteBuffers(1, &chunk.vbo_chunk_vertices);
+    glDeleteBuffers(1, &chunk.vbo_chunk_colors);
+    glDeleteBuffers(1, &chunk.ibo_chunk_elements);
+  }
 }
