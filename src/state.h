@@ -3,6 +3,7 @@
 #include <vector>
 #include "cube.h"
 #include "chunk.h"
+#include "world.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -22,6 +23,8 @@ typedef struct State_ {
 
   int last_drag_x;
   int last_drag_y;
+
+  World world;
 } State;
 
 typedef struct Display_Info_ {

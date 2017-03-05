@@ -39,7 +39,7 @@ void draw_chunk(Chunk& chunk){
   glDisableVertexAttribArray(chunk.attribute_v_color);
 }
 
-bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz){
+bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world){
 
   chunk.x = cx;
   chunk.y = cy;
@@ -96,7 +96,9 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz){
       for (int z = 0; z < Z; z++){
         //if (rand() % 8 < 7)
         //  continue;
-        if (cy + y > (rand() % 64))
+        //if (cy + y > (rand() % 64))
+        //  continue;
+        if (!get_block(world, cx+x, cy+y, cz+z))
           continue;
         unsigned short e000 = vertex_indices[tuple<int,int,int>(x, y, z)];
         unsigned short e001 = vertex_indices[tuple<int,int,int>(x, y, z+1)];

@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_utils.h"
 
+#include "world.h"
+
 typedef struct Chunk_ {
   double x, y, z;
   GLuint vbo_chunk_vertices;
@@ -17,5 +19,5 @@ typedef struct Chunk_ {
   GLint attribute_v_color;
 } Chunk;
 
-bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz);
+bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world);
 void draw_chunk(Chunk& chunk);

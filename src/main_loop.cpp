@@ -74,22 +74,22 @@ void step() {
   float cos_vert_ang = cos(render_state.player_rx/180*M_PI);
 
   if (down_keys.find('a') != down_keys.end()) {
-    render_state.player_x += cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z += cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('s') != down_keys.end()) {
-    render_state.player_x -= cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z -= cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('w') != down_keys.end()) {
-    render_state.player_x -= sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z += cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x -= cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z += cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
 
     render_state.player_y += sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
   if (down_keys.find('r') != down_keys.end()) {
-    render_state.player_x += sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
-    render_state.player_z -= cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_x += cos_vert_ang*sin_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+    render_state.player_z -= cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
 
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
@@ -227,13 +227,13 @@ bool init() {
     return false;
   }
 
-  int D = 8;
+  int D = 3;
 
-  for (int x = 0; x < D; x++){
-    for (int y = 0; y < D; y++){
-      for (int z = 0; z < D; z++){
+  for (int x = -D; x <= D; x++){
+    for (int y = -D; y <= D; y++){
+      for (int z = -D; z <= D; z++){
         Chunk chunk;
-        if (!init_chunk(chunk, render_state.program, x*16, y*16, z*16)){
+        if (!init_chunk(chunk, render_state.program, x*16, y*16, z*16, state.world)){
           return false;
         }
         render_state.chunks.push_back(chunk);

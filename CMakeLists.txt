@@ -50,6 +50,7 @@ add_executable(my_game
 
                         ../src/cube.cpp 
                         ../src/chunk.cpp 
+                        ../src/world.cpp 
               )
 #==================================================
 # Linking
