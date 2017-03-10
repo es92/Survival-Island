@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include <vector>
 
@@ -40,6 +41,7 @@ void display(void) {
 
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk chunk = render_state.chunks[i];
+
     glm::vec3 axis_y(1, 0, 0);
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk.x, chunk.y, chunk.z));
 
@@ -51,7 +53,18 @@ void display(void) {
     drawn += c_drawn;
   }
 
-  cout << drawn << endl;
+  const long t = epoch_millis();
+
+  double fps = 0;
+  const int S = 30;
+  if (render_state.last_draw_times.size() > S){
+    render_state.last_draw_times.erase(render_state.last_draw_times.begin());
+    fps = S*1000/(t*1. - render_state.last_draw_times[0]);
+  } 
+
+  cout << fixed << setprecision(1) << fps << " " << drawn << endl;
+
+  render_state.last_draw_times.push_back(t);
 
   glutSwapBuffers();
 }

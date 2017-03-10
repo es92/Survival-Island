@@ -114,7 +114,7 @@ void set_chunks(){
   cy = cy - cy % CHUNK_SIZE;
   cz = cz - cz % CHUNK_SIZE;
 
-  int D = 3;
+  int D = 5;
 
   for (int x = -D; x <= D; x++){
     for (int y = -D; y <= D; y++){

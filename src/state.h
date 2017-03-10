@@ -44,6 +44,8 @@ typedef struct Render_State_ {
   float player_ry;
   float player_rz;
 
+  std::vector<long> last_draw_times;
+
   GLuint program;
 
   GLint uniform_mvp;
