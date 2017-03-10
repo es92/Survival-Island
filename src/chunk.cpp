@@ -37,7 +37,7 @@ void init_chunk_vertices(){
   }
 }
 
-void draw_chunk(Chunk& chunk){
+int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov){
   glEnableVertexAttribArray(chunk.attribute_coord3d);
   // Describe our vertices array to OpenGL (it can't guess its format automatically)
   glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_vertices);
@@ -61,19 +61,74 @@ void draw_chunk(Chunk& chunk){
     0                  // offset of first element
   );
 
-  /* Push each element in buffer_vertices to the vertex shader */
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_elements);
-  int size;  glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-  glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+  int size;
+
+  bool draw_x_pos = -x > chunk.x;
+  bool draw_x_neg = -x < chunk.x + D;
+  bool draw_y_pos = -y > chunk.y;
+  bool draw_y_neg = -y < chunk.y + D;
+  bool draw_z_pos = -z > chunk.z;
+  bool draw_z_neg = -z < chunk.z + D;
+
+  int drawn = 0;
+
+  if (draw_x_pos){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_pos_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
+
+  if (draw_x_neg){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_neg_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
+
+  if (draw_y_pos){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_pos_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
+
+  if (draw_y_neg){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_neg_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
+
+  if (draw_z_pos){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_pos_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
+
+  if (draw_z_neg){
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_neg_elements);
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+    drawn += 1;
+  }
 
   glDisableVertexAttribArray(chunk.attribute_coord3d);
   glDisableVertexAttribArray(chunk.attribute_v_color);
+
+  return drawn;
 }
 
 void unload_chunk(Chunk& chunk){
   //glDeleteBuffers(1, &vbo_chunk_vertices);
   glDeleteBuffers(1, &chunk.vbo_chunk_colors);
-  glDeleteBuffers(1, &chunk.ibo_chunk_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_x_pos_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_x_neg_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_y_pos_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_y_neg_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_z_pos_elements);
+  glDeleteBuffers(1, &chunk.ibo_chunk_z_neg_elements);
 }
 
 bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world){
@@ -113,7 +168,12 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
     chunk_colors.insert(chunk_colors.end(), cube_colors.begin(), cube_colors.end());
   }
 
-  vector<GLushort> chunk_elements;
+  vector<GLushort> chunk_x_pos_elements;
+  vector<GLushort> chunk_x_neg_elements;
+  vector<GLushort> chunk_y_pos_elements;
+  vector<GLushort> chunk_y_neg_elements;
+  vector<GLushort> chunk_z_pos_elements;
+  vector<GLushort> chunk_z_neg_elements;
 
   for (int x = 0; x < X; x++){
     for (int y = 0; y < Y; y++){
@@ -132,27 +192,42 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
         unsigned short e101 = vertex_indices[tuple<int,int,int>(x+1, y, z+1)];
         unsigned short e110 = vertex_indices[tuple<int,int,int>(x+1, y+1, z)];
         unsigned short e111 = vertex_indices[tuple<int,int,int>(x+1, y+1, z+1)];
-        vector<GLushort> cube_elements({
-          // front
-          e001, e101, e111,
-          e111, e011, e001,
-          // top
+
+        vector<GLushort> cube_x_pos_elements({
           e101, e100, e110,
           e110, e111, e101,
-          // back
-          e010, e110, e100,
-          e100, e000, e010,
-          // bottom
+        });
+        chunk_x_pos_elements.insert(chunk_x_pos_elements.begin(), cube_x_pos_elements.begin(), cube_x_pos_elements.end());
+
+        vector<GLushort> cube_x_neg_elements({
           e000, e001, e011,
           e011, e010, e000,
-          // left
-          e000, e100, e101,
-          e101, e001, e000,
-          // right
+        });
+        chunk_x_neg_elements.insert(chunk_x_neg_elements.begin(), cube_x_neg_elements.begin(), cube_x_neg_elements.end());
+
+        vector<GLushort> cube_y_pos_elements({
           e011, e111, e110,
           e110, e010, e011,
         });
-        chunk_elements.insert(chunk_elements.begin(), cube_elements.begin(), cube_elements.end());
+        chunk_y_pos_elements.insert(chunk_y_pos_elements.begin(), cube_y_pos_elements.begin(), cube_y_pos_elements.end());
+
+        vector<GLushort> cube_y_neg_elements({
+          e000, e100, e101,
+          e101, e001, e000,
+        });
+        chunk_y_neg_elements.insert(chunk_y_neg_elements.begin(), cube_y_neg_elements.begin(), cube_y_neg_elements.end());
+
+        vector<GLushort> cube_z_pos_elements({
+          e001, e101, e111,
+          e111, e011, e001,
+        });
+        chunk_z_pos_elements.insert(chunk_z_pos_elements.begin(), cube_z_pos_elements.begin(), cube_z_pos_elements.end());
+
+        vector<GLushort> cube_z_neg_elements({
+          e010, e110, e100,
+          e100, e000, e010,
+        });
+        chunk_z_neg_elements.insert(chunk_z_neg_elements.begin(), cube_z_neg_elements.begin(), cube_z_neg_elements.end());
       }
     }
   }
@@ -163,9 +238,29 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
   glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_colors);
   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*chunk_colors.size(), &chunk_colors[0], GL_STATIC_DRAW);
 
-  glGenBuffers(1, &chunk.ibo_chunk_elements);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_elements);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_elements.size(), &chunk_elements[0], GL_STATIC_DRAW);
+  glGenBuffers(1, &chunk.ibo_chunk_x_pos_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_pos_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_x_pos_elements.size(), &chunk_x_pos_elements[0], GL_STATIC_DRAW);
+
+  glGenBuffers(1, &chunk.ibo_chunk_x_neg_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_neg_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_x_neg_elements.size(), &chunk_x_neg_elements[0], GL_STATIC_DRAW);
+
+  glGenBuffers(1, &chunk.ibo_chunk_y_pos_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_pos_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_y_pos_elements.size(), &chunk_y_pos_elements[0], GL_STATIC_DRAW);
+
+  glGenBuffers(1, &chunk.ibo_chunk_y_neg_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_neg_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_y_neg_elements.size(), &chunk_y_neg_elements[0], GL_STATIC_DRAW);
+
+  glGenBuffers(1, &chunk.ibo_chunk_z_pos_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_pos_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_z_pos_elements.size(), &chunk_z_pos_elements[0], GL_STATIC_DRAW);
+
+  glGenBuffers(1, &chunk.ibo_chunk_z_neg_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_neg_elements);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*chunk_z_neg_elements.size(), &chunk_z_neg_elements[0], GL_STATIC_DRAW);
 
   const char* attribute_name;
   attribute_name = "coord3d";

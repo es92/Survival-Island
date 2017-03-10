@@ -32,7 +32,11 @@ void display(void) {
                    glm::rotate(glm::mat4(1.0f), glm::radians(render_state.player_rz), glm::vec3(0, 0, 1)) *
                    glm::translate(glm::mat4(1.0f), glm::vec3(render_state.player_x, render_state.player_y, render_state.player_z));
 
-  glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 500.0f);
+  float fov = 45.0f;
+
+  glm::mat4 projection = glm::perspective(fov, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 500.0f);
+
+  int drawn = 0;
 
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk chunk = render_state.chunks[i];
@@ -42,8 +46,12 @@ void display(void) {
     glm::mat4 mvp = projection * view * model;
     glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
-    draw_chunk(chunk);
+    int c_drawn = draw_chunk(chunk, render_state.player_x, render_state.player_y, render_state.player_z, 
+                      render_state.player_rx, render_state.player_ry, render_state.player_rz, fov);
+    drawn += c_drawn;
   }
+
+  cout << drawn << endl;
 
   glutSwapBuffers();
 }
