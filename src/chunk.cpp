@@ -37,6 +37,18 @@ void init_chunk_vertices(){
   }
 }
 
+double vec_3d_angle(double fwd_x, double fwd_y, double fwd_z,
+                    double chunk_camera_x, double chunk_camera_y, double chunk_camera_z){
+
+  double fwd_norm = sqrt(fwd_x*fwd_x + fwd_y*fwd_y + fwd_z*fwd_z);
+  double chunk_camera_norm = sqrt(chunk_camera_x*chunk_camera_x + chunk_camera_y*chunk_camera_y + chunk_camera_z*chunk_camera_z);
+
+  double chunk_camera_angle = acos((fwd_x*chunk_camera_x + 
+                                    fwd_y*chunk_camera_y + 
+                                    fwd_z*chunk_camera_z)/(fwd_norm*chunk_camera_norm))*180/M_PI;
+  return chunk_camera_angle;
+}
+
 int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov){
   glEnableVertexAttribArray(chunk.attribute_coord3d);
   // Describe our vertices array to OpenGL (it can't guess its format automatically)
@@ -62,6 +74,44 @@ int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry,
   );
 
   int size;
+
+  double cos_ang = cos(ry/180*M_PI);
+  double sin_ang = sin(ry/180*M_PI);
+
+  double sin_vert_ang = sin(rx/180*M_PI);
+  double cos_vert_ang = cos(rx/180*M_PI);
+
+  double fwd_x = cos_vert_ang*sin_ang;
+  double fwd_z = -cos_vert_ang*cos_ang;
+  double fwd_y = -sin_vert_ang;
+
+  bool chunk_in_fov = false;
+
+  for (int cx = 0; cx <= 1; cx++){
+    for (int cy = 0; cy <= 1; cy++){
+      for (int cz = 0; cz <= 1; cz++){
+
+        double chunk_camera_x = chunk.x + cx*D + x; 
+        double chunk_camera_y = chunk.y + cy*D + y; 
+        double chunk_camera_z = chunk.z + cz*D + z; 
+
+        double chunk_camera_angle = vec_3d_angle(fwd_x, fwd_y, fwd_z, chunk_camera_x, chunk_camera_y, chunk_camera_z);
+        bool in_view = isnan(chunk_camera_angle) || chunk_camera_angle < fov;
+
+        chunk_in_fov = chunk_in_fov || in_view;
+
+        if (chunk_in_fov)
+          break;
+      }
+      if (chunk_in_fov)
+        break;
+    }
+    if (chunk_in_fov)
+      break;
+  }
+
+  if (!chunk_in_fov)
+    return 0;
 
   bool draw_x_pos = -x > chunk.x;
   bool draw_x_neg = -x < chunk.x + D;
