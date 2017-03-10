@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <tuple>
 #include <vector>
+#include <boost/unordered_set.hpp>
+using boost::unordered_set;
 
 const int CHUNK_SIZE = 16;
 
@@ -106,7 +108,7 @@ void step() {
 }
 
 void set_chunks(){
-  set<tuple<int, int, int> > active_chunks;
+  unordered_set<tuple<int, int, int> > active_chunks;
   int cx = render_state.player_x;
   int cy = render_state.player_y;
   int cz = render_state.player_z;
@@ -116,49 +118,44 @@ void set_chunks(){
 
   int D = 5;
 
+  unordered_set<tuple<int, int, int> > chunks_to_load;
+
+  unordered_set<tuple<int, int, int> > xyzs_to_unload;
+  for (int i = 0; i < render_state.chunks.size(); i++){
+    Chunk c = render_state.chunks[i];
+    xyzs_to_unload.insert(tuple<int, int, int>(c.x, c.y, c.z));
+  }
+
   for (int x = -D; x <= D; x++){
     for (int y = -D; y <= D; y++){
       for (int z = -D; z <= D; z++){
-        active_chunks.insert(tuple<int, int, int>(-cx + x*CHUNK_SIZE, -cy + y*CHUNK_SIZE, -cz + z*CHUNK_SIZE));
+        chunks_to_load.insert(tuple<int, int, int>(-cx + x*CHUNK_SIZE, -cy + y*CHUNK_SIZE, -cz + z*CHUNK_SIZE));
+        xyzs_to_unload.erase(tuple<int, int, int>(-cx + x*CHUNK_SIZE, -cy + y*CHUNK_SIZE, -cz + z*CHUNK_SIZE));
       }
     }
   }
 
-  set<tuple<int, int, int> > loaded_chunks;
+  unordered_set<tuple<int, int, int> > loaded_chunks;
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk c = render_state.chunks[i];
-    loaded_chunks.insert(tuple<int, int, int>(c.x, c.y, c.z));
+    chunks_to_load.erase(tuple<int, int, int>(c.x, c.y, c.z));
   }
 
-  set<tuple<int, int, int> > chunks_to_load;
-  set_difference(active_chunks.begin(), active_chunks.end(), loaded_chunks.begin(), loaded_chunks.end(), inserter(chunks_to_load, chunks_to_load.end()));
-
-  set<tuple<int, int, int> > xyzs_to_unload;
-  set_difference(loaded_chunks.begin(), loaded_chunks.end(), active_chunks.begin(), active_chunks.end(), inserter(xyzs_to_unload, xyzs_to_unload.end()));
-
-  vector<Chunk> chunks_to_unload;
-
-  for (int i = 0; i < render_state.chunks.size(); i++){
-    Chunk c = render_state.chunks[i];
-    if (xyzs_to_unload.find(tuple<int, int, int>(c.x, c.y, c.z)) != xyzs_to_unload.end()){
-      chunks_to_unload.push_back(c);
-    }
-  }
-
-  for (int i = 0; i < chunks_to_unload.size(); i++){
-    Chunk c = chunks_to_unload[i];
-    unload_chunk(c);
+  for (unordered_set<tuple<int, int, int> >::iterator it=xyzs_to_unload.begin(); it != xyzs_to_unload.end(); it++){
+    int x, y, z;
+    tie(x, y, z) = *it;
     for (int j = 0; j < render_state.chunks.size(); j++){
-      if (render_state.chunks[j].x == c.x && 
-          render_state.chunks[j].y == c.y && 
-          render_state.chunks[j].z == c.z){
+      if (render_state.chunks[j].x == x && 
+          render_state.chunks[j].y == y && 
+          render_state.chunks[j].z == z){
+        unload_chunk(render_state.chunks[j]);
         render_state.chunks.erase(render_state.chunks.begin() + j);
         break;
       }
     }
   }
 
-  for (set<tuple<int, int, int> >::iterator it=chunks_to_load.begin(); it != chunks_to_load.end(); it++){
+  for (unordered_set<tuple<int, int, int> >::iterator it=chunks_to_load.begin(); it != chunks_to_load.end(); it++){
     int x, y, z;
     tie(x, y, z) = *it;
     cout << x << " " << y << " " << z << endl;

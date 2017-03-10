@@ -11,7 +11,7 @@ using namespace std;
 
 bool get_block(World& world, int x, int y, int z){
 
-  int mode = CUBE_FIELD;
+  int mode = HILLS;
 
   if (mode == HILLS) {
     x = (x + 64) % 128;
