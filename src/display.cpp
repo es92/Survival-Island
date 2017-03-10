@@ -12,6 +12,7 @@
 #include "display.h"
 #include "state.h"
 #include "utils.h"
+#include "timer.h"
 
 #include <fstream>
 #include <iostream>
@@ -22,6 +23,8 @@
 using namespace std;
 
 void display(void) {
+
+  Timer timer;
 
   glClearColor(1.0, 1.0, 1.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -37,34 +40,33 @@ void display(void) {
 
   glm::mat4 projection = glm::perspective(fov, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 500.0f);
 
+  glm::mat4 projection_view = projection * view;
+
   int drawn = 0;
 
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk chunk = render_state.chunks[i];
 
-    glm::vec3 axis_y(1, 0, 0);
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk.x, chunk.y, chunk.z));
-
-    glm::mat4 mvp = projection * view * model;
-    glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-
-    int c_drawn = draw_chunk(chunk, render_state.player_x, render_state.player_y, render_state.player_z, 
+    int c_drawn = draw_chunk(projection_view, chunk, render_state.player_x, render_state.player_y, render_state.player_z, 
                       render_state.player_rx, render_state.player_ry, render_state.player_rz, fov);
     drawn += c_drawn;
   }
+
+  float tt = timer.end()*1000;
 
   const long t = epoch_millis();
 
   double fps = 0;
   const int S = 30;
-  if (render_state.last_draw_times.size() > S){
-    render_state.last_draw_times.erase(render_state.last_draw_times.begin());
-    fps = S*1000/(t*1. - render_state.last_draw_times[0]);
+  if (display_info.last_draw_times.size() > S){
+    display_info.last_draw_times.erase(display_info.last_draw_times.begin());
+    fps = S*1000/(t*1. - display_info.last_draw_times[0]);
+    display_info.tris = drawn;
+    display_info.fps = fps;
+    display_info.render_time = tt;
   } 
 
-  cout << fixed << setprecision(1) << fps << " " << drawn << endl;
-
-  render_state.last_draw_times.push_back(t);
+  display_info.last_draw_times.push_back(t);
 
   glutSwapBuffers();
 }

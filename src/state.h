@@ -24,11 +24,20 @@ typedef struct State_ {
   int last_drag_x;
   int last_drag_y;
 
+  float last_player_x;
+  float last_player_y;
+  float last_player_z;
+
+  int step;
+
   World world;
 } State;
 
 typedef struct Display_Info_ {
-  std::vector<long> display_times;
+  std::vector<long> last_draw_times;
+  int tris;
+  float fps;
+  float render_time;
 } Display_Info;
 
 typedef struct Render_State_ {
@@ -43,8 +52,6 @@ typedef struct Render_State_ {
   float player_rx;
   float player_ry;
   float player_rz;
-
-  std::vector<long> last_draw_times;
 
   GLuint program;
 

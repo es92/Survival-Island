@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
+#include "state.h"
 
 #include <iostream>
 using namespace std;
@@ -69,34 +70,11 @@ double vec_3d_angle(double fwd_x, double fwd_y, double fwd_z,
   return chunk_camera_angle;
 }
 
-int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov){
+int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov){
 
   if (chunk.empty){
     return 0;
   }
-
-  glEnableVertexAttribArray(chunk.attribute_coord3d);
-  // Describe our vertices array to OpenGL (it can't guess its format automatically)
-  glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_vertices);
-  glVertexAttribPointer(
-    chunk.attribute_coord3d, // attribute
-    3,                 // number of elements per vertex, here (x,y,z)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    0,                 // no extra data between each position
-    0                  // offset of first element
-  );
-
-  glEnableVertexAttribArray(chunk.attribute_v_color);
-  glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_colors);
-  glVertexAttribPointer(
-    chunk.attribute_v_color, // attribute
-    3,                 // number of elements per vertex, here (R,G,B)
-    GL_FLOAT,          // the type of each element
-    GL_FALSE,          // take our values as-is
-    0,                 // no extra data between each position
-    0                  // offset of first element
-  );
 
   int size;
 
@@ -146,6 +124,35 @@ int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry,
   bool draw_z_neg = -z < chunk.z + D;
 
   int drawn = 0;
+
+  glEnableVertexAttribArray(chunk.attribute_coord3d);
+  // Describe our vertices array to OpenGL (it can't guess its format automatically)
+  glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_vertices);
+  glVertexAttribPointer(
+    chunk.attribute_coord3d, // attribute
+    3,                 // number of elements per vertex, here (x,y,z)
+    GL_FLOAT,          // the type of each element
+    GL_FALSE,          // take our values as-is
+    0,                 // no extra data between each position
+    0                  // offset of first element
+  );
+
+  glEnableVertexAttribArray(chunk.attribute_v_color);
+  glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_colors);
+  glVertexAttribPointer(
+    chunk.attribute_v_color, // attribute
+    3,                 // number of elements per vertex, here (R,G,B)
+    GL_FLOAT,          // the type of each element
+    GL_FALSE,          // take our values as-is
+    0,                 // no extra data between each position
+    0                  // offset of first element
+  );
+
+  glm::vec3 axis_y(1, 0, 0);
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk.x, chunk.y, chunk.z));
+
+  glm::mat4 mvp = projection_view * model;
+  glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
   if (draw_x_pos){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_pos_elements);

@@ -23,7 +23,7 @@ bool get_block(World& world, int x, int y, int z){
     x /= 4;
     z /= 4;
 
-    return x*x + z*z < -y+32 || y == -32;
+    return (x*x + z*z < -y+32 || y == -32) && y > -33;
   } else if (mode == CUBE_FIELD) {
     return x % 4 == 0 && y % 4 == 0 && z % 4 == 0;
   } else if (mode == SMALL_CUBE) {

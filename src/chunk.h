@@ -1,3 +1,5 @@
+#ifndef CHUNK_
+#define CHUNK_
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -30,4 +32,6 @@ typedef struct Chunk_ {
 
 bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world);
 void unload_chunk(Chunk& chunk);
-int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov);
+int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov);
+
+#endif

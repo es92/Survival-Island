@@ -7,9 +7,10 @@
 #include "display.h"
 #include "events.h"
 #include "utils.h"
+#include "timer.h"
 
 #include <iostream>
-#include <set>
+#include <iomanip>
 #include <algorithm>
 #include <tuple>
 #include <vector>
@@ -24,9 +25,9 @@ void step(void);
 void process_events();
 void process_event(Event* e);
 
-std::set<unsigned char> down_keys;
-std::set<int> down_special_keys;
-std::set<int> down_mouse_buttons;
+unordered_set<unsigned char> down_keys;
+unordered_set<int> down_special_keys;
+unordered_set<int> down_mouse_buttons;
 
 void set_chunks();
 
@@ -42,7 +43,10 @@ void main_loop() {
   state.queued_runtime += diff;
 
   while (state.queued_runtime > MILLIS_PER_UPDATE) {
+    Timer timer;
     step();
+    float tt = timer.end()*1000;
+    cout << fixed << setprecision(1) << tt << " " << display_info.render_time << " " << display_info.fps << " " << display_info.tris << endl;
     state.queued_runtime -= MILLIS_PER_UPDATE;
     state.last_update_time = t;
   }
@@ -104,7 +108,21 @@ void step() {
   }
 
 
-  set_chunks();
+  if (
+      state.step == 0 ||
+      (floor(state.last_player_x / 16) != floor(render_state.player_x / 16)) ||
+      (floor(state.last_player_y / 16) != floor(render_state.player_y / 16)) ||
+      (floor(state.last_player_z / 16) != floor(render_state.player_z / 16))){
+    set_chunks();
+  }
+
+
+  state.last_player_x = render_state.player_x;
+  state.last_player_y = render_state.player_y;
+  state.last_player_z = render_state.player_z;
+
+
+  state.step += 1;
 }
 
 void set_chunks(){
@@ -116,7 +134,7 @@ void set_chunks(){
   cy = cy - cy % CHUNK_SIZE;
   cz = cz - cz % CHUNK_SIZE;
 
-  int D = 5;
+  int D = 10;
 
   unordered_set<tuple<int, int, int> > chunks_to_load;
 
@@ -158,7 +176,7 @@ void set_chunks(){
   for (unordered_set<tuple<int, int, int> >::iterator it=chunks_to_load.begin(); it != chunks_to_load.end(); it++){
     int x, y, z;
     tie(x, y, z) = *it;
-    cout << x << " " << y << " " << z << endl;
+    //cout << x << " " << y << " " << z << endl;
     Chunk chunk;
     if (!init_chunk(chunk, render_state.program, x, y, z, state.world)){
       throw runtime_error("could not init chunk");
