@@ -50,6 +50,11 @@ double vec_3d_angle(double fwd_x, double fwd_y, double fwd_z,
 }
 
 int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry, double rz, float fov){
+
+  if (chunk.empty){
+    return 0;
+  }
+
   glEnableVertexAttribArray(chunk.attribute_coord3d);
   // Describe our vertices array to OpenGL (it can't guess its format automatically)
   glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_vertices);
@@ -228,10 +233,6 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
   for (int x = 0; x < X; x++){
     for (int y = 0; y < Y; y++){
       for (int z = 0; z < Z; z++){
-        //if (rand() % 8 < 7)
-        //  continue;
-        //if (cy + y > (rand() % 64))
-        //  continue;
         if (!get_block(world, cx+x, cy+y, cz+z))
           continue;
         unsigned short e000 = vertex_indices[tuple<int,int,int>(x, y, z)];
@@ -301,6 +302,14 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
     }
   }
 
+  bool empty =  chunk_x_pos_elements.size() + 
+                chunk_x_neg_elements.size() + 
+                chunk_y_pos_elements.size() + 
+                chunk_y_neg_elements.size() + 
+                chunk_z_pos_elements.size() + 
+                chunk_z_neg_elements.size() == 0;
+
+  chunk.empty = empty;
 
 
   glGenBuffers(1, &chunk.vbo_chunk_colors);

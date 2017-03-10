@@ -24,6 +24,8 @@ typedef struct Chunk_ {
 
   GLint attribute_coord3d;
   GLint attribute_v_color;
+
+  bool empty;
 } Chunk;
 
 bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world);
