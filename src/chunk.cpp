@@ -6,6 +6,37 @@
 #include <iostream>
 using namespace std;
 
+vector<GLfloat> chunk_vertices;
+GLuint vbo_chunk_vertices;
+map< tuple<int,int,int>, GLushort > vertex_indices;
+
+int D = 16;
+
+void init_chunk_vertices(){
+
+  int X = D;
+  int Y = D;
+  int Z = D;
+
+
+  unsigned short index = 0;
+  for (int x = 0; x <= X; x++){
+    for (int y = 0; y <= Y; y++){
+      for (int z = 0; z <= Z; z++){
+        chunk_vertices.push_back(x);
+        chunk_vertices.push_back(y);
+        chunk_vertices.push_back(z);
+
+        tuple<int, int, int> coords(x, y, z);
+
+        vertex_indices.insert(pair< tuple<int,int,int>, GLushort >(coords, index));
+
+        index += 1;
+      }
+    }
+  }
+}
+
 void draw_chunk(Chunk& chunk){
   glEnableVertexAttribArray(chunk.attribute_coord3d);
   // Describe our vertices array to OpenGL (it can't guess its format automatically)
@@ -40,7 +71,7 @@ void draw_chunk(Chunk& chunk){
 }
 
 void unload_chunk(Chunk& chunk){
-  glDeleteBuffers(1, &chunk.vbo_chunk_vertices);
+  //glDeleteBuffers(1, &vbo_chunk_vertices);
   glDeleteBuffers(1, &chunk.vbo_chunk_colors);
   glDeleteBuffers(1, &chunk.ibo_chunk_elements);
 }
@@ -51,32 +82,19 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
   chunk.y = cy;
   chunk.z = cz;
 
-  vector<GLfloat> chunk_vertices;
-
-  int D = 16;
-
   int X = D;
   int Y = D;
   int Z = D;
 
-  map< tuple<int,int,int>, GLushort > vertex_indices;
+  if (chunk_vertices.size() == 0) {
+    init_chunk_vertices();
 
-  unsigned short index = 0;
-  for (int x = 0; x <= X; x++){
-    for (int y = 0; y <= Y; y++){
-      for (int z = 0; z <= Z; z++){
-        chunk_vertices.push_back(x);
-        chunk_vertices.push_back(y);
-        chunk_vertices.push_back(z);
-
-        tuple<int, int, int> coords(x, y, z);
-
-        vertex_indices.insert(pair< tuple<int,int,int>, GLushort >(coords, index));
-
-        index += 1;
-      }
-    }
+    glGenBuffers(1, &vbo_chunk_vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_chunk_vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*chunk_vertices.size(), &chunk_vertices[0], GL_STATIC_DRAW);
   }
+
+  chunk.vbo_chunk_vertices = vbo_chunk_vertices;
 
   vector<GLfloat> cube_colors({
     1.0, 0.0, 0.0,
@@ -140,9 +158,6 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
   }
 
 
-  glGenBuffers(1, &chunk.vbo_chunk_vertices);
-  glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*chunk_vertices.size(), &chunk_vertices[0], GL_STATIC_DRAW);
 
   glGenBuffers(1, &chunk.vbo_chunk_colors);
   glBindBuffer(GL_ARRAY_BUFFER, chunk.vbo_chunk_colors);
