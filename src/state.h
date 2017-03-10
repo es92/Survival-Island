@@ -35,6 +35,15 @@ typedef struct Render_State_ {
   float angle;
   int screen_width;
   int screen_height;
+
+  float player_x;
+  float player_y;
+  float player_z;
+
+  float player_rx;
+  float player_ry;
+  float player_rz;
+
   GLuint program;
 
   GLint uniform_mvp;
@@ -42,16 +51,10 @@ typedef struct Render_State_ {
   Cube cube;
   std::vector<Chunk> chunks;
 
-  float player_rx;
-  float player_ry;
-  float player_rz;
-  float player_x;
-  float player_y;
-  float player_z;
-
 } Render_State;
 
 extern State state;
 extern Display_Info display_info;
 extern Render_State render_state;
+
 

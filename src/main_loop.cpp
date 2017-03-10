@@ -10,6 +10,11 @@
 
 #include <iostream>
 #include <set>
+#include <algorithm>
+#include <tuple>
+#include <vector>
+
+const int CHUNK_SIZE = 16;
 
 using namespace std;
 
@@ -20,6 +25,8 @@ void process_event(Event* e);
 std::set<unsigned char> down_keys;
 std::set<int> down_special_keys;
 std::set<int> down_mouse_buttons;
+
+void set_chunks();
 
 // ==========================================================
 
@@ -92,6 +99,75 @@ void step() {
     render_state.player_z -= cos_vert_ang*cos_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
 
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
+  }
+
+
+  set_chunks();
+}
+
+void set_chunks(){
+  set<tuple<int, int, int> > active_chunks;
+  int cx = render_state.player_x;
+  int cy = render_state.player_y;
+  int cz = render_state.player_z;
+  cx = cx - cx % CHUNK_SIZE;
+  cy = cy - cy % CHUNK_SIZE;
+  cz = cz - cz % CHUNK_SIZE;
+
+  int D = 2;
+
+  for (int x = -D; x <= D; x++){
+    for (int y = -D; y <= D; y++){
+      for (int z = -D; z <= D; z++){
+        active_chunks.insert(tuple<int, int, int>(-cx + x*CHUNK_SIZE, -cy + y*CHUNK_SIZE, -cz + z*CHUNK_SIZE));
+      }
+    }
+  }
+
+  set<tuple<int, int, int> > loaded_chunks;
+  for (int i = 0; i < render_state.chunks.size(); i++){
+    Chunk c = render_state.chunks[i];
+    loaded_chunks.insert(tuple<int, int, int>(c.x, c.y, c.z));
+  }
+
+  set<tuple<int, int, int> > chunks_to_load;
+  set_difference(active_chunks.begin(), active_chunks.end(), loaded_chunks.begin(), loaded_chunks.end(), inserter(chunks_to_load, chunks_to_load.end()));
+
+  set<tuple<int, int, int> > xyzs_to_unload;
+  set_difference(loaded_chunks.begin(), loaded_chunks.end(), active_chunks.begin(), active_chunks.end(), inserter(xyzs_to_unload, xyzs_to_unload.end()));
+
+  vector<Chunk> chunks_to_unload;
+
+  for (int i = 0; i < render_state.chunks.size(); i++){
+    Chunk c = render_state.chunks[i];
+    if (xyzs_to_unload.find(tuple<int, int, int>(c.x, c.y, c.z)) != xyzs_to_unload.end()){
+      chunks_to_unload.push_back(c);
+    }
+  }
+
+  for (int i = 0; i < chunks_to_unload.size(); i++){
+    Chunk c = chunks_to_unload[i];
+    unload_chunk(c);
+    for (int j = 0; j < render_state.chunks.size(); j++){
+      if (render_state.chunks[j].x == c.x && 
+          render_state.chunks[j].y == c.y && 
+          render_state.chunks[j].z == c.z){
+        render_state.chunks.erase(render_state.chunks.begin() + j);
+        break;
+      }
+    }
+  }
+
+  for (set<tuple<int, int, int> >::iterator it=chunks_to_load.begin(); it != chunks_to_load.end(); it++){
+    int x, y, z;
+    tie(x, y, z) = *it;
+    cout << x << " " << y << " " << z << endl;
+    Chunk chunk;
+    if (!init_chunk(chunk, render_state.program, x, y, z, state.world)){
+      throw runtime_error("could not init chunk");
+    }
+    render_state.chunks.push_back(chunk);
+
   }
 }
 
@@ -227,19 +303,6 @@ bool init() {
     return false;
   }
 
-  int D = 3;
-
-  for (int x = -D; x <= D; x++){
-    for (int y = -D; y <= D; y++){
-      for (int z = -D; z <= D; z++){
-        Chunk chunk;
-        if (!init_chunk(chunk, render_state.program, x*16, y*16, z*16, state.world)){
-          return false;
-        }
-        render_state.chunks.push_back(chunk);
-      }
-    }
-  }
-
   return true;
 }
+

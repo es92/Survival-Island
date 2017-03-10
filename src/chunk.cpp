@@ -39,6 +39,12 @@ void draw_chunk(Chunk& chunk){
   glDisableVertexAttribArray(chunk.attribute_v_color);
 }
 
+void unload_chunk(Chunk& chunk){
+  glDeleteBuffers(1, &chunk.vbo_chunk_vertices);
+  glDeleteBuffers(1, &chunk.vbo_chunk_colors);
+  glDeleteBuffers(1, &chunk.ibo_chunk_elements);
+}
+
 bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world){
 
   chunk.x = cx;

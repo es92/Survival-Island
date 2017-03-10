@@ -20,4 +20,5 @@ typedef struct Chunk_ {
 } Chunk;
 
 bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& world);
+void unload_chunk(Chunk& chunk);
 void draw_chunk(Chunk& chunk);

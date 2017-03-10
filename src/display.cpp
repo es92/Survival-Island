@@ -34,21 +34,6 @@ void display(void) {
 
   glm::mat4 projection = glm::perspective(45.0f, 1.0f*render_state.screen_width/render_state.screen_height, 0.1f, 500.0f);
 
-  //for (int i = 0; i < 20; i++){
-  //  for (int j = 0; j < 20; j++){
-  //    for (int k = 0; k < 20; k++){
-  //      glm::vec3 axis_y(1, 0, 0);
-  //      glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(render_state.angle), axis_y);
-  //      glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i*3, k*3, j*3));
-
-  //      glm::mat4 mvp = projection * view * model * anim;
-  //      glUniformMatrix4fv(render_state.uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-
-  //      draw_cube(render_state.cube);
-  //    }
-  //  }
-  //}
-
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk chunk = render_state.chunks[i];
     glm::vec3 axis_y(1, 0, 0);
@@ -71,8 +56,6 @@ void free_resources() {
 
   for (int i = 0; i < render_state.chunks.size(); i++){
     Chunk chunk = render_state.chunks[i];
-    glDeleteBuffers(1, &chunk.vbo_chunk_vertices);
-    glDeleteBuffers(1, &chunk.vbo_chunk_colors);
-    glDeleteBuffers(1, &chunk.ibo_chunk_elements);
+    unload_chunk(chunk);
   }
 }
