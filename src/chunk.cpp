@@ -126,42 +126,42 @@ int draw_chunk(Chunk& chunk, double x, double y, double z, double rx, double ry,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_pos_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   if (draw_x_neg){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_x_neg_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   if (draw_y_pos){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_pos_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   if (draw_y_neg){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_y_neg_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   if (draw_z_pos){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_pos_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   if (draw_z_neg){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk.ibo_chunk_z_neg_elements);
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
     glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
-    drawn += 1;
+    drawn += size;
   }
 
   glDisableVertexAttribArray(chunk.attribute_coord3d);
@@ -243,41 +243,60 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
         unsigned short e110 = vertex_indices[tuple<int,int,int>(x+1, y+1, z)];
         unsigned short e111 = vertex_indices[tuple<int,int,int>(x+1, y+1, z+1)];
 
-        vector<GLushort> cube_x_pos_elements({
-          e101, e100, e110,
-          e110, e111, e101,
-        });
-        chunk_x_pos_elements.insert(chunk_x_pos_elements.begin(), cube_x_pos_elements.begin(), cube_x_pos_elements.end());
+        bool x_pos_block = get_block(world, cx+x+1, cy+y, cz+z);
+        bool x_neg_block = get_block(world, cx+x-1, cy+y, cz+z);
+        bool y_pos_block = get_block(world, cx+x, cy+y+1, cz+z);
+        bool y_neg_block = get_block(world, cx+x, cy+y-1, cz+z);
+        bool z_pos_block = get_block(world, cx+x, cy+y, cz+z+1);
+        bool z_neg_block = get_block(world, cx+x, cy+y, cz+z-1);
 
-        vector<GLushort> cube_x_neg_elements({
-          e000, e001, e011,
-          e011, e010, e000,
-        });
-        chunk_x_neg_elements.insert(chunk_x_neg_elements.begin(), cube_x_neg_elements.begin(), cube_x_neg_elements.end());
+        if (!x_pos_block){
+          vector<GLushort> cube_x_pos_elements({
+            e101, e100, e110,
+            e110, e111, e101,
+          });
+          chunk_x_pos_elements.insert(chunk_x_pos_elements.begin(), cube_x_pos_elements.begin(), cube_x_pos_elements.end());
+        }
 
-        vector<GLushort> cube_y_pos_elements({
-          e011, e111, e110,
-          e110, e010, e011,
-        });
-        chunk_y_pos_elements.insert(chunk_y_pos_elements.begin(), cube_y_pos_elements.begin(), cube_y_pos_elements.end());
+        if (!x_neg_block){
+          vector<GLushort> cube_x_neg_elements({
+            e000, e001, e011,
+            e011, e010, e000,
+          });
+          chunk_x_neg_elements.insert(chunk_x_neg_elements.begin(), cube_x_neg_elements.begin(), cube_x_neg_elements.end());
+        }
 
-        vector<GLushort> cube_y_neg_elements({
-          e000, e100, e101,
-          e101, e001, e000,
-        });
-        chunk_y_neg_elements.insert(chunk_y_neg_elements.begin(), cube_y_neg_elements.begin(), cube_y_neg_elements.end());
+        if (!y_pos_block){
+          vector<GLushort> cube_y_pos_elements({
+            e011, e111, e110,
+            e110, e010, e011,
+          });
+          chunk_y_pos_elements.insert(chunk_y_pos_elements.begin(), cube_y_pos_elements.begin(), cube_y_pos_elements.end());
+        }
 
-        vector<GLushort> cube_z_pos_elements({
-          e001, e101, e111,
-          e111, e011, e001,
-        });
-        chunk_z_pos_elements.insert(chunk_z_pos_elements.begin(), cube_z_pos_elements.begin(), cube_z_pos_elements.end());
+        if (!y_neg_block){
+          vector<GLushort> cube_y_neg_elements({
+            e000, e100, e101,
+            e101, e001, e000,
+          });
+          chunk_y_neg_elements.insert(chunk_y_neg_elements.begin(), cube_y_neg_elements.begin(), cube_y_neg_elements.end());
+        }
 
-        vector<GLushort> cube_z_neg_elements({
-          e010, e110, e100,
-          e100, e000, e010,
-        });
-        chunk_z_neg_elements.insert(chunk_z_neg_elements.begin(), cube_z_neg_elements.begin(), cube_z_neg_elements.end());
+        if (!z_pos_block){
+          vector<GLushort> cube_z_pos_elements({
+            e001, e101, e111,
+            e111, e011, e001,
+          });
+          chunk_z_pos_elements.insert(chunk_z_pos_elements.begin(), cube_z_pos_elements.begin(), cube_z_pos_elements.end());
+        }
+
+        if (!z_neg_block){
+          vector<GLushort> cube_z_neg_elements({
+            e010, e110, e100,
+            e100, e000, e010,
+          });
+          chunk_z_neg_elements.insert(chunk_z_neg_elements.begin(), cube_z_neg_elements.begin(), cube_z_neg_elements.end());
+        }
       }
     }
   }

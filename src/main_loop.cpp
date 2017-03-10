@@ -107,9 +107,9 @@ void step() {
 
 void set_chunks(){
   set<tuple<int, int, int> > active_chunks;
-  int cx = 0;//render_state.player_x;
-  int cy = 0;//render_state.player_y;
-  int cz = 0;//render_state.player_z;
+  int cx = render_state.player_x;
+  int cy = render_state.player_y;
+  int cz = render_state.player_z;
   cx = cx - cx % CHUNK_SIZE;
   cy = cy - cy % CHUNK_SIZE;
   cz = cz - cz % CHUNK_SIZE;
