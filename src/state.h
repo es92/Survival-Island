@@ -10,10 +10,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_utils.h"
+#include "utils.h"
+
+#include <boost/unordered_map.hpp>
+using  boost::unordered::unordered_map;
 
 #include <vector>
-
-const int DISPLAY_TIMES_LEN = 100;
 
 typedef struct State_ {
   long last_update_time;
@@ -58,7 +60,7 @@ typedef struct Render_State_ {
   GLint uniform_mvp;
 
   Cube cube;
-  std::vector<Chunk> chunks;
+  unordered_map<XYZ, Chunk> chunks;
 
 } Render_State;
 

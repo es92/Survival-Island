@@ -44,8 +44,8 @@ void display(void) {
 
   int drawn = 0;
 
-  for (int i = 0; i < render_state.chunks.size(); i++){
-    Chunk chunk = render_state.chunks[i];
+  for (unordered_map<XYZ, Chunk>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
+    Chunk& chunk = it->second;
 
     int c_drawn = draw_chunk(projection_view, chunk, render_state.player_x, render_state.player_y, render_state.player_z, 
                       render_state.player_rx, render_state.player_ry, render_state.player_rz, fov);
@@ -77,8 +77,8 @@ void free_resources() {
   glDeleteBuffers(1, &render_state.cube.vbo_cube_colors);
   glDeleteBuffers(1, &render_state.cube.ibo_cube_elements);
 
-  for (int i = 0; i < render_state.chunks.size(); i++){
-    Chunk chunk = render_state.chunks[i];
+  for (unordered_map<XYZ, Chunk>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
+    Chunk& chunk = it->second;
     unload_chunk(chunk);
   }
 }

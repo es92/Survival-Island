@@ -3,13 +3,14 @@
 #include <map>
 #include <tuple>
 #include "state.h"
+#include "utils.h"
 
 #include <iostream>
 using namespace std;
 
 vector<GLfloat> chunk_vertices;
 GLuint vbo_chunk_vertices;
-map< tuple<int,int,int>, GLushort > vertex_indices;
+map< XYZ, GLushort > vertex_indices;
 
 GLuint vbo_chunk_colors;
 vector<GLfloat> chunk_colors;
@@ -31,9 +32,9 @@ void init_chunk_vertices(){
         chunk_vertices.push_back(y);
         chunk_vertices.push_back(z);
 
-        tuple<int, int, int> coords(x, y, z);
+        XYZ coords(x, y, z);
 
-        vertex_indices.insert(pair< tuple<int,int,int>, GLushort >(coords, index));
+        vertex_indices.insert(pair< XYZ, GLushort >(coords, index));
 
         index += 1;
       }
@@ -250,14 +251,14 @@ bool init_chunk(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& wor
       for (int z = 0; z < Z; z++){
         if (!get_block(world, cx+x, cy+y, cz+z))
           continue;
-        unsigned short e000 = vertex_indices[tuple<int,int,int>(x, y, z)];
-        unsigned short e001 = vertex_indices[tuple<int,int,int>(x, y, z+1)];
-        unsigned short e010 = vertex_indices[tuple<int,int,int>(x, y+1, z)];
-        unsigned short e011 = vertex_indices[tuple<int,int,int>(x, y+1, z+1)];
-        unsigned short e100 = vertex_indices[tuple<int,int,int>(x+1, y, z)];
-        unsigned short e101 = vertex_indices[tuple<int,int,int>(x+1, y, z+1)];
-        unsigned short e110 = vertex_indices[tuple<int,int,int>(x+1, y+1, z)];
-        unsigned short e111 = vertex_indices[tuple<int,int,int>(x+1, y+1, z+1)];
+        unsigned short e000 = vertex_indices[XYZ(x, y, z)];
+        unsigned short e001 = vertex_indices[XYZ(x, y, z+1)];
+        unsigned short e010 = vertex_indices[XYZ(x, y+1, z)];
+        unsigned short e011 = vertex_indices[XYZ(x, y+1, z+1)];
+        unsigned short e100 = vertex_indices[XYZ(x+1, y, z)];
+        unsigned short e101 = vertex_indices[XYZ(x+1, y, z+1)];
+        unsigned short e110 = vertex_indices[XYZ(x+1, y+1, z)];
+        unsigned short e111 = vertex_indices[XYZ(x+1, y+1, z+1)];
 
         bool x_pos_block = get_block(world, cx+x+1, cy+y, cz+z);
         bool x_neg_block = get_block(world, cx+x-1, cy+y, cz+z);

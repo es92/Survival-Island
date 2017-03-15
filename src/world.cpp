@@ -14,8 +14,8 @@ bool get_block(World& world, int x, int y, int z){
   int mode = HILLS;
 
   if (mode == HILLS) {
-    x = (x + 64) % 128;
-    z = (z + 64) % 128;
+    x = (x + 64*1000000) % 128;
+    z = (z + 64*1000000) % 128;
 
     x -= 64;
     z -= 64;

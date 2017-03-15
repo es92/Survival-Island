@@ -1,3 +1,9 @@
 
 rendering
-  - speedup set_cubes, super slow
+  thread cube loading / unloading
+  add textures
+
+automata
+  simple blinker
+  water
+  plants
