@@ -1,6 +1,9 @@
 
 #include "events.h"
 
+#include <iostream>
+using namespace std;
+
 std::queue<Event*> event_queue;
 
 void on_mouse(int button, int button_state, int x, int y) {

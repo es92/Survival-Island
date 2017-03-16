@@ -21,7 +21,7 @@ using boost::unordered_set;
 #include <thread>
 
 const int CHUNK_SIZE = 16;
-const int RENDER_DIST = 16;
+const int RENDER_DIST = 4;
 
 using namespace std;
 
@@ -55,7 +55,8 @@ void main_loop() {
     Timer timer;
     step();
     float tt = timer.end()*1000;
-    cout << "ST " << fixed << setprecision(1) << tt << " RT " << display_info.render_time << " FPS " << display_info.fps << " TRIS " << display_info.tris << " CHUNKS " << render_state.chunks.size() << endl;
+    if (tt > 5)
+      cout << "ST " << fixed << setprecision(1) << tt << " RT " << display_info.render_time << " FPS " << display_info.fps << " TRIS " << display_info.tris << " CHUNKS " << render_state.chunks.size() << endl;
     state.queued_runtime -= MILLIS_PER_UPDATE;
     state.last_update_time = t;
   }
@@ -246,6 +247,10 @@ void trap_mouse(int x, int y) {
   if (!state.lock_pointer){
     return;
   }
+  if (x == render_state.screen_width/2 && y == render_state.screen_height/2){
+    state.last_drag_x = x;
+    state.last_drag_y = y;
+  }
   if (state.last_drag_x != -1){
     int diff_x = x - state.last_drag_x;
     int diff_y = y - state.last_drag_y;
@@ -259,13 +264,14 @@ void trap_mouse(int x, int y) {
       render_state.player_rx = -115;
   }
 
-  int win_w = glutGet(GLUT_WINDOW_WIDTH);
-  int win_h = glutGet(GLUT_WINDOW_HEIGHT);
+  if (   x < render_state.screen_width/10 || x > render_state.screen_width*9/10
+      || y < render_state.screen_height/10 || y > render_state.screen_height*9/10){
+    glutWarpPointer(render_state.screen_width/2, render_state.screen_height/2);
+  } else {
+    state.last_drag_x = x;
+    state.last_drag_y = y;
+  }
 
-  state.last_drag_x = win_w/2;
-  state.last_drag_y = win_h/2;
-
-  glutWarpPointer(win_w/2, win_h/2);
 }
 
 void process_event(Event* e) {
