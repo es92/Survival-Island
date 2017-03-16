@@ -37,6 +37,14 @@ if(NOT GLEW_FOUND)
 endif(NOT GLEW_FOUND)
 
 #==================================================
+# Find BOOST
+#==================================================
+
+find_package( Boost COMPONENTS thread system filesystem REQUIRED ) #whatever libs you need
+include_directories( ${Boost_INCLUDE_DIRS} )
+find_package( Threads )
+
+#==================================================
 # Include Files
 #==================================================
 add_executable(my_game 
@@ -50,9 +58,10 @@ add_executable(my_game
 
                         ../src/cube.cpp 
                         ../src/chunk.cpp 
+                        ../src/chunk_loader.cpp 
                         ../src/world.cpp 
               )
 #==================================================
 # Linking
 #==================================================
-target_link_libraries(my_game ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
+target_link_libraries(my_game ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${Boost_LIBRARIES} )

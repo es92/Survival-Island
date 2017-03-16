@@ -12,8 +12,13 @@
 #include "shader_utils.h"
 #include "utils.h"
 
+#include "chunk_loader.h"
+
 #include <boost/unordered_map.hpp>
 using  boost::unordered::unordered_map;
+
+#include <boost/lockfree/spsc_queue.hpp>
+using boost::lockfree::spsc_queue;
 
 #include <vector>
 
@@ -32,6 +37,9 @@ typedef struct State_ {
 
   int step;
 
+  spsc_queue<Chunk_Action_Res*, boost::lockfree::capacity<35937> > chunk_action_ress;
+  spsc_queue<Chunk_Action_Req*, boost::lockfree::capacity<35937> > chunk_action_reqs;
+
   World world;
 } State;
 
@@ -43,6 +51,7 @@ typedef struct Display_Info_ {
 } Display_Info;
 
 typedef struct Render_State_ {
+  int render_dist;
   float angle;
   int screen_width;
   int screen_height;

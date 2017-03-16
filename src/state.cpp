@@ -14,6 +14,7 @@ State state = {
 };
 
 Render_State render_state = {
+  .render_dist = 4,
   .angle = 0,
   .screen_width = 800,
   .screen_height = 600,

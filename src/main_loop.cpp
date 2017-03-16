@@ -20,8 +20,9 @@ using boost::unordered_set;
 #include <chrono>
 #include <thread>
 
-const int CHUNK_SIZE = 16;
-const int RENDER_DIST = 4;
+#include "chunk_loader.h"
+
+#include "constants.h"
 
 using namespace std;
 
@@ -32,13 +33,6 @@ void process_event(Event* e);
 unordered_set<unsigned char> down_keys;
 unordered_set<int> down_special_keys;
 unordered_set<int> down_mouse_buttons;
-
-void set_chunks();
-void load_all_chunks();
-
-int snap_to_chunk(int x){
-  return x - x % CHUNK_SIZE;
-}
 
 // ==========================================================
 
@@ -117,22 +111,31 @@ void step() {
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 
-  if (
-      state.step == 0 ||
-      (snap_to_chunk(state.last_player_x) != snap_to_chunk(render_state.player_x)) ||
-      (snap_to_chunk(state.last_player_y) != snap_to_chunk(render_state.player_y)) ||
-      (snap_to_chunk(state.last_player_z) != snap_to_chunk(render_state.player_z))){
-    //int d = set_chunks();
-    if (state.step == 0){
-      load_all_chunks();
-    } else {
-      set_chunks();
-    }
-    //if (state.step > 0 && d > 0){
-    //  std::this_thread::sleep_for(std::chrono::milliseconds(120*1000));
-    //}
+  if (state.step % 100 == 0){
+    int x = rand() % 30;
+    int y = rand() % 30;
+    int z = rand() % 30;
+    toggle_block(state.world, x, y, z);
   }
 
+  unordered_set<XYZ> changed_chunks = get_changed_chunks(state.world);
+
+  if (state.step == 0){
+    start_chunk_loader_thread();
+    toggle_block(state.world, 2, 2, 2);
+    load_all_chunks();
+  } else {
+    bool player_moved_chunks = 
+       ((snap_to_chunk(state.last_player_x) != snap_to_chunk(render_state.player_x)) ||
+        (snap_to_chunk(state.last_player_y) != snap_to_chunk(render_state.player_y)) ||
+        (snap_to_chunk(state.last_player_z) != snap_to_chunk(render_state.player_z)));
+
+    set_chunks(player_moved_chunks, changed_chunks);
+  }
+
+  reset_changed_chunks(state.world);
+
+  process_chunk_action_ress();
 
   state.last_player_x = render_state.player_x;
   state.last_player_y = render_state.player_y;
@@ -142,97 +145,7 @@ void step() {
   state.step += 1;
 }
 
-void load_all_chunks(){
-  int pcx = -snap_to_chunk(render_state.player_x);
-  int pcy = -snap_to_chunk(render_state.player_y);
-  int pcz = -snap_to_chunk(render_state.player_x);
 
-  unordered_set<XYZ> xyzs_to_load;
-  for (int x = -RENDER_DIST; x <= RENDER_DIST; x++){
-    for (int y = -RENDER_DIST; y <= RENDER_DIST; y++){
-      for (int z = -RENDER_DIST; z <= RENDER_DIST; z++){
-        xyzs_to_load.insert(XYZ(-pcx + x*CHUNK_SIZE, -pcy + y*CHUNK_SIZE, -pcz + z*CHUNK_SIZE));
-      }
-    }
-  }
-
-  for (unordered_set<XYZ>::iterator it=xyzs_to_load.begin(); it != xyzs_to_load.end(); it++){
-    int x, y, z;
-    tie(x, y, z) = *it;
-    Chunk chunk;
-    if (!init_chunk(chunk, render_state.program, x, y, z, state.world)){
-      throw runtime_error("could not init chunk");
-    }
-    render_state.chunks.insert({*it, chunk});
-  }
-}
-
-void set_chunks(){
-  int pcx = -snap_to_chunk(render_state.player_x);
-  int pcy = -snap_to_chunk(render_state.player_y);
-  int pcz = -snap_to_chunk(render_state.player_z);
-  int lcx = -snap_to_chunk(state.last_player_x);
-  int lcy = -snap_to_chunk(state.last_player_y);
-  int lcz = -snap_to_chunk(state.last_player_z);
-
-  unordered_set<XYZ> xyzs_to_unload;
-  unordered_set<XYZ> xyzs_to_load;
-  if (pcx != lcx){
-    int load_cx = pcx + (pcx - lcx)*RENDER_DIST;
-    int unload_cx = pcx + (lcx - pcx)*(RENDER_DIST+1);
-    for (int y = -RENDER_DIST; y <= RENDER_DIST; y++){
-      for (int z = -RENDER_DIST; z <= RENDER_DIST; z++){
-        int cy = pcy + y*CHUNK_SIZE;
-        int cz = pcz + z*CHUNK_SIZE;
-        xyzs_to_load.insert(XYZ(load_cx, cy, cz));
-        xyzs_to_unload.insert(XYZ(unload_cx, cy, cz));
-      }
-    }
-  }
-  if (pcy != lcy){
-    int load_cy = pcy + (pcy - lcy)*RENDER_DIST;
-    int unload_cy = pcy + (lcy - pcy)*(RENDER_DIST+1);
-    for (int x = -RENDER_DIST; x <= RENDER_DIST; x++){
-      for (int z = -RENDER_DIST; z <= RENDER_DIST; z++){
-        int cx = pcx + x*CHUNK_SIZE;
-        int cz = pcz + z*CHUNK_SIZE;
-        xyzs_to_load.insert(XYZ(cx, load_cy, cz));
-        xyzs_to_unload.insert(XYZ(cx, unload_cy, cz));
-      }
-    }
-  }
-  if (pcz != lcz){
-    int load_cz = pcz + (pcz - lcz)*RENDER_DIST;
-    int unload_cz = pcz + (lcz - pcz)*(RENDER_DIST+1);
-    for (int y = -RENDER_DIST; y <= RENDER_DIST; y++){
-      for (int x = -RENDER_DIST; x <= RENDER_DIST; x++){
-        int cy = pcy + y*CHUNK_SIZE;
-        int cx = pcx + x*CHUNK_SIZE;
-        xyzs_to_load.insert(XYZ(cx, cy, load_cz));
-        xyzs_to_unload.insert(XYZ(cx, cy, unload_cz));
-      }
-    }
-  }
-
-  for (unordered_set<XYZ>::iterator it=xyzs_to_unload.begin(); it != xyzs_to_unload.end(); it++){
-    int x, y, z;
-    tie(x, y, z) = *it;
-    Chunk& c = render_state.chunks.find(*it)->second;
-    unload_chunk(c);
-    render_state.chunks.erase(render_state.chunks.find(*it)->first);
-  }
-
-  for (unordered_set<XYZ>::iterator it=xyzs_to_load.begin(); it != xyzs_to_load.end(); it++){
-    int x, y, z;
-    tie(x, y, z) = *it;
-    Chunk chunk;
-    //cout << "INSERT " << x << " "<< y << " " << z << endl;
-    if (!init_chunk(chunk, render_state.program, x, y, z, state.world)){
-      throw runtime_error("could not init chunk");
-    }
-    render_state.chunks.insert({*it, chunk});
-  }
-}
 
 void process_events() {
   while (!event_queue.empty()) {
