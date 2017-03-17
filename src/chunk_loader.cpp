@@ -22,8 +22,8 @@ void process_chunk_action_ress(){
     if (res->type() == Chunk_Action_Ress::Unload_Chunk_Res) {
       Unload_Chunk_Action_Res* u_res = static_cast<Unload_Chunk_Action_Res*>(res);
 
-      Chunk& c = render_state.chunks.find(u_res->xyz)->second;
       if (render_state.chunks.find(u_res->xyz) != render_state.chunks.end()){
+        Chunk& c = render_state.chunks.find(u_res->xyz)->second;
         render_state.chunks.erase(u_res->xyz);
         unload_chunk(c);
       }
@@ -32,6 +32,12 @@ void process_chunk_action_ress(){
 
       int x, y, z;
       tie(x, y, z) = l_res->xyz;
+
+      if (render_state.chunks.find(l_res->xyz) != render_state.chunks.end()){
+        Chunk& c = render_state.chunks.find(l_res->xyz)->second;
+        render_state.chunks.erase(l_res->xyz);
+        unload_chunk(c);
+      }
 
       Chunk c = l_res->chunk;
 
@@ -157,7 +163,6 @@ void set_chunks(bool player_moved_chunks, unordered_set<XYZ> changed_chunks){
     if (   pcx - horizon < x && pcx + horizon > x
         && pcy - horizon < y && pcy + horizon > y
         && pcz - horizon < z && pcz + horizon > z){
-      xyzs_to_unload.insert(XYZ(x, y, z));
       xyzs_to_load.insert(XYZ(x, y, z));
     }
   }

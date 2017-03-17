@@ -3,7 +3,6 @@ rendering
   add textures
   simplify requests
     - don't load if load/unload later
-  fix chunk flickering (don't unload then reload, just check if need to unload before load)
   multiple background threads (number requests, throw in mutexed priority queue, add to main thread queue if next)
   infinite distance
 
