@@ -1,5 +1,8 @@
 
 #include "constants.h"
+#include <iostream>
+#include <utility>
+#include "utils.h"
 
 #include <chrono>
 using namespace std::chrono;
@@ -13,5 +16,12 @@ double millis_diff_to_fps(long millis) {
 }
 
 int snap_to_chunk(int x){
-  return x - x % CHUNK_SIZE;
+  int mod;
+  if (x < 0){
+    mod = abs(x+1) % CHUNK_SIZE;
+    mod = CHUNK_SIZE - mod - 1;
+  } else {
+    mod = x % CHUNK_SIZE;
+  }
+  return x - mod;
 }
