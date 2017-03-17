@@ -67,7 +67,7 @@ void World_DB::set_block(World_Gen& gen, bool exists, XYZ xyz){
 // =============================
 
 bool World_Gen::get_block(XYZ xyz){
-  int mode = FIELD;
+  int mode = SEED;
   int x, y, z;
   tie(x, y, z) = xyz;
 

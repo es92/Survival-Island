@@ -189,6 +189,19 @@ void process_event(Event* e) {
     Mouse_Event* me = static_cast<Mouse_Event*>(e);
     if (me->button_state == GLUT_DOWN) {
       down_mouse_buttons.insert(me->button);
+
+      float cos_ang = cos(render_state.player_ry/180*M_PI);
+      float sin_ang = sin(render_state.player_ry/180*M_PI);
+
+      float sin_vert_ang = sin(render_state.player_rx/180*M_PI);
+      float cos_vert_ang = cos(render_state.player_rx/180*M_PI);
+
+      int x = -render_state.player_x + cos_vert_ang*sin_ang*4;
+      int z = -render_state.player_z - cos_vert_ang*cos_ang*4;
+      int y = -render_state.player_y - sin_vert_ang*4;
+
+      set_block(state.world, true, x, y, z);
+
     } else if (me->button_state == GLUT_UP) {
       down_mouse_buttons.erase(me->button);
     }
