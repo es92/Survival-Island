@@ -60,6 +60,7 @@ add_executable(my_game
                         ../src/chunk.cpp 
                         ../src/chunk_loader.cpp 
                         ../src/world.cpp 
+                        ../src/automata.cpp 
               )
 #==================================================
 # Linking

@@ -17,6 +17,7 @@ class World_DB {
     World_DB(){ };
     bool get_block(World_Gen& gen, XYZ xyz);
     void set_block(World_Gen& gen, bool exists, XYZ xyz);
+    unordered_set<XYZ> maybe_needs_update;
   private:
     void maybe_gen_chunk(World_Gen& gen, XYZ xyz);
     unordered_set<XYZ> blocks;

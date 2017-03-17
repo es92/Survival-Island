@@ -111,11 +111,8 @@ void step() {
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 
-  if (state.step % 100 == 0){
-    int x = rand() % 30;
-    int y = rand() % 30;
-    int z = rand() % 30;
-    set_block(state.world, true, x, y, z);
+  if (state.step > 60 && state.step % 100 == 0){
+    step_automata(state.world, state.automata);
   }
 
   unordered_set<XYZ> changed_chunks = get_changed_chunks(state.world);

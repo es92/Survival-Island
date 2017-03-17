@@ -11,6 +11,7 @@ using namespace std;
 #define CUBE_FIELD 1
 #define SMALL_CUBE 2
 #define FIELD 3
+#define SEED 4
 
 // =============================
 
@@ -30,6 +31,14 @@ void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
           bool exists = gen.get_block(block_xyz);
           if (exists){
             blocks.insert(block_xyz);
+
+            //maybe_needs_update.insert(XYZ(cx+x+1, cy+y+0, cz+z+0));
+            //maybe_needs_update.insert(XYZ(cx+x-1, cy+y+0, cz+z+0));
+            //maybe_needs_update.insert(XYZ(cx+x+0, cy+y+1, cz+z+0));
+            //maybe_needs_update.insert(XYZ(cx+x+0, cy+y-1, cz+z+0));
+            //maybe_needs_update.insert(XYZ(cx+x+0, cy+y+0, cz+z+1));
+            //maybe_needs_update.insert(XYZ(cx+x+0, cy+y+0, cz+z-1));
+
           }
         }
       }
@@ -79,6 +88,8 @@ bool World_Gen::get_block(XYZ xyz){
     return abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
   } else if (mode == FIELD) {
     return (y < -3);
+  } else if (mode == SEED) {
+    return x == 0 && y == 0 && z == 0;
   }
 }
 
@@ -90,7 +101,31 @@ bool get_block(World& world, int x, int y, int z){
 
 void set_block(World& world, bool exists, int x, int y, int z){
   world.db.set_block(world.gen, exists, XYZ(x, y, z));
+
   world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z)));
+  if (x == 0){
+    world.cc.insert(XYZ(snap_to_chunk(x-1), snap_to_chunk(y), snap_to_chunk(z)));
+  } else if (x == CHUNK_SIZE-1){
+    world.cc.insert(XYZ(snap_to_chunk(x+1), snap_to_chunk(y), snap_to_chunk(z)));
+  }
+  if (y == 0){
+    world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y-1), snap_to_chunk(z)));
+  } else if (y == CHUNK_SIZE-1){
+    world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y+1), snap_to_chunk(z)));
+  }
+  if (z == 0){
+    world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z-1)));
+  } else if (z == CHUNK_SIZE-1){
+    world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z+1)));
+  }
+
+
+  world.db.maybe_needs_update.insert(XYZ(x+1, y+0, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x-1, y+0, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y-1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z+1));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z-1));
 }
 
 unordered_set<XYZ> get_changed_chunks(World& world){

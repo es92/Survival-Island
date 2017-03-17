@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_utils.h"
 #include "utils.h"
+#include "automata.h"
 
 #include "chunk_loader.h"
 
@@ -41,6 +42,7 @@ typedef struct State_ {
   spsc_queue<Chunk_Action_Req*, boost::lockfree::capacity<35937> > chunk_action_reqs;
 
   World world;
+  Automata automata;
 } State;
 
 typedef struct Display_Info_ {
