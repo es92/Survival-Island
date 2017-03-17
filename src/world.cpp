@@ -1,8 +1,10 @@
 
 
 #include "world.h"
+#include "constants.h"
 
 #include <cstdlib>
+#include <iostream>
 using namespace std;
 
 #define HILLS 0
@@ -10,10 +12,55 @@ using namespace std;
 #define SMALL_CUBE 2
 #define FIELD 3
 
-bool get_block(World& world, int x, int y, int z){
+// =============================
 
+void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
+  int x, y, z;
+  tie(x, y, z) = xyz;
+  int cx = snap_to_chunk(x);
+  int cy = snap_to_chunk(y);
+  int cz = snap_to_chunk(z);
+  XYZ chunk_xyz = XYZ(cx, cy, cz);
+
+  if (initialized_chunks.find(chunk_xyz) == initialized_chunks.end()){
+    for (int x = 0; x < CHUNK_SIZE; x++){
+      for (int y = 0; y < CHUNK_SIZE; y++){
+        for (int z = 0; z < CHUNK_SIZE; z++){
+          XYZ block_xyz = XYZ(cx+x, cy+y, cz+z);
+          bool exists = gen.get_block(block_xyz);
+          if (exists){
+            blocks.insert(block_xyz);
+          }
+        }
+      }
+    }
+    initialized_chunks.insert(chunk_xyz);
+  }
+
+}
+
+bool World_DB::get_block(World_Gen& gen, XYZ xyz){
+  maybe_gen_chunk(gen, xyz);
+  return blocks.find(xyz) != blocks.end();
+}
+
+void World_DB::set_block(World_Gen& gen, bool exists, XYZ xyz){
+  maybe_gen_chunk(gen, xyz);
+  if (exists){
+    blocks.insert(xyz);
+  } else {
+    if (blocks.find(xyz) != blocks.end()){
+      blocks.erase(xyz);
+    }
+  }
+}
+
+// =============================
+
+bool World_Gen::get_block(XYZ xyz){
   int mode = FIELD;
-  XYZ xyz(x, y, z);
+  int x, y, z;
+  tie(x, y, z) = xyz;
 
   if (mode == HILLS) {
     x = (x + 64*1000000) % 128;
@@ -25,23 +72,24 @@ bool get_block(World& world, int x, int y, int z){
     x /= 4;
     z /= 4;
 
-    return ((x*x + z*z < -y+32 || y == -32) && y > -33) ^ (world.toggled.find(xyz) != world.toggled.end());
+    return (x*x + z*z < -y+32 || y == -32) && y > -33;
   } else if (mode == CUBE_FIELD) {
-    return (x % 4 == 0 && y % 4 == 0 && z % 4 == 0) ^ (world.toggled.find(xyz) != world.toggled.end());
+    return (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
   } else if (mode == SMALL_CUBE) {
     return abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
   } else if (mode == FIELD) {
-    return (y < -3) ^ (world.toggled.find(xyz) != world.toggled.end());
+    return (y < -3);
   }
 }
 
-void toggle_block(World& world, int x, int y, int z){
-  XYZ xyz(x, y, z);
-  if (world.toggled.find(xyz) == world.toggled.end()){
-    world.toggled.insert(xyz);
-  } else {
-    world.toggled.erase(xyz);
-  }
+// =============================
+
+bool get_block(World& world, int x, int y, int z){
+  return world.db.get_block(world.gen, XYZ(x, y, z));
+}
+
+void set_block(World& world, bool exists, int x, int y, int z){
+  world.db.set_block(world.gen, exists, XYZ(x, y, z));
   world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z)));
 }
 

@@ -3,6 +3,7 @@
 #include <map>
 #include <tuple>
 #include "state.h"
+#include "constants.h"
 #include "utils.h"
 
 #include <iostream>
@@ -16,13 +17,11 @@ map< XYZ, GLushort > vertex_indices;
 GLuint vbo_chunk_colors;
 vector<GLfloat> chunk_colors;
 
-int D = 16;
-
 void init_chunk_vertices(){
 
-  int X = D;
-  int Y = D;
-  int Z = D;
+  int X = CHUNK_SIZE;
+  int Y = CHUNK_SIZE;
+  int Z = CHUNK_SIZE;
 
 
   unsigned short index = 0;
@@ -96,9 +95,9 @@ int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, doub
     for (int cy = 0; cy <= 1; cy++){
       for (int cz = 0; cz <= 1; cz++){
 
-        double chunk_camera_x = chunk.x + cx*D + x; 
-        double chunk_camera_y = chunk.y + cy*D + y; 
-        double chunk_camera_z = chunk.z + cz*D + z; 
+        double chunk_camera_x = chunk.x + cx*CHUNK_SIZE + x; 
+        double chunk_camera_y = chunk.y + cy*CHUNK_SIZE + y; 
+        double chunk_camera_z = chunk.z + cz*CHUNK_SIZE + z; 
 
         double chunk_camera_angle = vec_3d_angle(fwd_x, fwd_y, fwd_z, chunk_camera_x, chunk_camera_y, chunk_camera_z);
         bool in_view = isnan(chunk_camera_angle) || chunk_camera_angle < fov;
@@ -119,11 +118,11 @@ int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, doub
     return 0;
 
   bool draw_x_pos = -x > chunk.x;
-  bool draw_x_neg = -x < chunk.x + D;
+  bool draw_x_neg = -x < chunk.x + CHUNK_SIZE;
   bool draw_y_pos = -y > chunk.y;
-  bool draw_y_neg = -y < chunk.y + D;
+  bool draw_y_neg = -y < chunk.y + CHUNK_SIZE;
   bool draw_z_pos = -z > chunk.z;
-  bool draw_z_neg = -z < chunk.z + D;
+  bool draw_z_neg = -z < chunk.z + CHUNK_SIZE;
 
   int drawn = 0;
 
@@ -225,9 +224,9 @@ void init_chunk_cubes(Chunk& chunk, int cx, int cy, int cz, World& world){
   chunk.y = cy;
   chunk.z = cz;
 
-  int X = D;
-  int Y = D;
-  int Z = D;
+  int X = CHUNK_SIZE;
+  int Y = CHUNK_SIZE;
+  int Z = CHUNK_SIZE;
 
   chunk.chunk_x_pos_elements.clear();
   chunk.chunk_x_neg_elements.clear();

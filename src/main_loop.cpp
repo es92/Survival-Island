@@ -115,14 +115,13 @@ void step() {
     int x = rand() % 30;
     int y = rand() % 30;
     int z = rand() % 30;
-    toggle_block(state.world, x, y, z);
+    set_block(state.world, true, x, y, z);
   }
 
   unordered_set<XYZ> changed_chunks = get_changed_chunks(state.world);
 
   if (state.step == 0){
     start_chunk_loader_thread();
-    toggle_block(state.world, 2, 2, 2);
     load_all_chunks();
   } else {
     bool player_moved_chunks = 
