@@ -1,6 +1,5 @@
 
 rendering
-  add textures
   simplify requests
     - don't load if load/unload later
   multiple background threads (number requests, throw in mutexed priority queue, add to main thread queue if next)

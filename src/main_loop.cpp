@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "timer.h"
 
+#include <SOIL/SOIL.h>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -200,7 +201,9 @@ void process_event(Event* e) {
       int z = -render_state.player_z - cos_vert_ang*cos_ang*4;
       int y = -render_state.player_y - sin_vert_ang*4;
 
-      set_block(state.world, true, x, y, z);
+      if (state.lock_pointer){
+        set_block(state.world, true, x, y, z);
+      }
 
     } else if (me->button_state == GLUT_UP) {
       down_mouse_buttons.erase(me->button);
@@ -289,9 +292,16 @@ bool init() {
     return false;
   }
 
-  if (!init_cube(render_state.cube, render_state.program)){
-    return false;
-  }
+  glGenTextures(1, &render_state.cubes_texture);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, render_state.cubes_texture);
+  int width, height;
+  unsigned char* image = SOIL_load_image("../textures/cubes.png", &width, &height, 0, SOIL_LOAD_RGB);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  SOIL_free_image_data(image);
+  glUniform1i(glGetUniformLocation(render_state.program, "tex_cubes"), 0);
 
   return true;
 }

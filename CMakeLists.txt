@@ -45,6 +45,14 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 find_package( Threads )
 
 #==================================================
+# Find SOIL
+#==================================================
+
+FIND_PATH(SOIL_INCLUDE_DIR SOIL.h PATH_SUFFIXES include/SOIL include)
+SET(SOIL_NAMES SOIL Soil soil)
+FIND_LIBRARY(SOIL_LIBRARY NAMES ${SOIL_NAMES} )
+
+#==================================================
 # Include Files
 #==================================================
 add_executable(my_game 
@@ -65,4 +73,4 @@ add_executable(my_game
 #==================================================
 # Linking
 #==================================================
-target_link_libraries(my_game ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${Boost_LIBRARIES} )
+target_link_libraries(my_game ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${Boost_LIBRARIES} ${SOIL_LIBRARY} )

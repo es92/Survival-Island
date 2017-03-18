@@ -48,8 +48,8 @@ class Load_Chunk_Action_Res : public Chunk_Action_Res {
   public:
     Chunk_Action_Ress type() { return Chunk_Action_Ress::Load_Chunk_Res; }
     XYZ xyz;
-    Chunk chunk;
-    Load_Chunk_Action_Res(XYZ _xyz, Chunk _chunk) : 
+    Chunk& chunk;
+    Load_Chunk_Action_Res(XYZ _xyz, Chunk& _chunk) : 
           xyz(_xyz),
           chunk(_chunk){ }
 };

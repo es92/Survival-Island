@@ -42,10 +42,13 @@ void display(void) {
 
   glm::mat4 projection_view = projection * view;
 
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, render_state.cubes_texture);
+
   int drawn = 0;
 
-  for (unordered_map<XYZ, Chunk>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
-    Chunk& chunk = it->second;
+  for (unordered_map<XYZ, Chunk*>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
+    Chunk& chunk = *it->second;
 
     int c_drawn = draw_chunk(projection_view, chunk, render_state.player_x, render_state.player_y, render_state.player_z, 
                       render_state.player_rx, render_state.player_ry, render_state.player_rz, fov);
@@ -73,12 +76,9 @@ void display(void) {
 
 void free_resources() {
   glDeleteProgram(render_state.program);
-  glDeleteBuffers(1, &render_state.cube.vbo_cube_vertices);
-  glDeleteBuffers(1, &render_state.cube.vbo_cube_colors);
-  glDeleteBuffers(1, &render_state.cube.ibo_cube_elements);
 
-  for (unordered_map<XYZ, Chunk>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
-    Chunk& chunk = it->second;
-    unload_chunk(chunk);
+  for (unordered_map<XYZ, Chunk*>::iterator it=render_state.chunks.begin(); it != render_state.chunks.end(); it++){
+    Chunk& chunk = *it->second;
+    unload_chunk(&chunk);
   }
 }

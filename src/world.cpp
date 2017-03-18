@@ -89,7 +89,7 @@ bool World_Gen::get_block(XYZ xyz){
   } else if (mode == FIELD) {
     return (y < -3);
   } else if (mode == SEED) {
-    return x == 0 && y == 0 && z == 0;
+    return x == 1 && y == -1 && z == -6;
   }
 }
 

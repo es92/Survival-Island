@@ -23,9 +23,9 @@ void process_chunk_action_ress(){
       Unload_Chunk_Action_Res* u_res = static_cast<Unload_Chunk_Action_Res*>(res);
 
       if (render_state.chunks.find(u_res->xyz) != render_state.chunks.end()){
-        Chunk& c = render_state.chunks.find(u_res->xyz)->second;
+        Chunk& c = *render_state.chunks.find(u_res->xyz)->second;
         render_state.chunks.erase(u_res->xyz);
-        unload_chunk(c);
+        unload_chunk(&c);
       }
     } else if (res->type() == Chunk_Action_Ress::Load_Chunk_Res) {
       Load_Chunk_Action_Res* l_res = static_cast<Load_Chunk_Action_Res*>(res);
@@ -34,18 +34,18 @@ void process_chunk_action_ress(){
       tie(x, y, z) = l_res->xyz;
 
       if (render_state.chunks.find(l_res->xyz) != render_state.chunks.end()){
-        Chunk& c = render_state.chunks.find(l_res->xyz)->second;
+        Chunk& c = *render_state.chunks.find(l_res->xyz)->second;
         render_state.chunks.erase(l_res->xyz);
-        unload_chunk(c);
+        unload_chunk(&c);
       }
 
-      Chunk c = l_res->chunk;
+      Chunk& c = l_res->chunk;
 
       if (!init_chunk_gl(c, render_state.program, x, y, z, state.world)){
         throw runtime_error("could not init chunk");
       }
 
-      render_state.chunks.insert({l_res->xyz, c});
+      render_state.chunks.insert({l_res->xyz, &c});
     }
     delete res;
   }
@@ -68,9 +68,9 @@ void chunk_loader(void){
         int x, y, z;
         tie(x, y, z) = l_req->xyz;
 
-        Chunk chunk;
-        init_chunk_cubes(chunk, x, y, z, state.world);
-        state.chunk_action_ress.push(new Load_Chunk_Action_Res(l_req->xyz, chunk));
+        Chunk* chunk = new Chunk;
+        init_chunk_cubes(*chunk, x, y, z, state.world);
+        state.chunk_action_ress.push(new Load_Chunk_Action_Res(l_req->xyz, *chunk));
       }
 
       delete req;

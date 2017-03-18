@@ -70,8 +70,9 @@ typedef struct Render_State_ {
 
   GLint uniform_mvp;
 
-  Cube cube;
-  unordered_map<XYZ, Chunk> chunks;
+  unordered_map<XYZ, Chunk*> chunks;
+
+  GLuint cubes_texture;
 
 } Render_State;
 
