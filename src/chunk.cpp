@@ -80,27 +80,33 @@ int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, doub
 
   bool chunk_in_fov = false;
 
-  for (int cx = 0; cx <= 1; cx++){
-    for (int cy = 0; cy <= 1; cy++){
-      for (int cz = 0; cz <= 1; cz++){
+  if (-x > chunk.x && -x < chunk.x + CHUNK_SIZE &&
+      -y > chunk.y && -y < chunk.y + CHUNK_SIZE &&
+      -y > chunk.y && -y < chunk.y + CHUNK_SIZE){
+    chunk_in_fov = true;
+  } else {
+    for (int cx = 0; cx <= 1; cx++){
+      for (int cy = 0; cy <= 1; cy++){
+        for (int cz = 0; cz <= 1; cz++){
 
-        double chunk_camera_x = chunk.x + cx*CHUNK_SIZE + x; 
-        double chunk_camera_y = chunk.y + cy*CHUNK_SIZE + y; 
-        double chunk_camera_z = chunk.z + cz*CHUNK_SIZE + z; 
+          double chunk_camera_x = chunk.x + cx*CHUNK_SIZE + x; 
+          double chunk_camera_y = chunk.y + cy*CHUNK_SIZE + y; 
+          double chunk_camera_z = chunk.z + cz*CHUNK_SIZE + z; 
 
-        double chunk_camera_angle = vec_3d_angle(fwd_x, fwd_y, fwd_z, chunk_camera_x, chunk_camera_y, chunk_camera_z);
-        bool in_view = isnan(chunk_camera_angle) || chunk_camera_angle < fov;
+          double chunk_camera_angle = vec_3d_angle(fwd_x, fwd_y, fwd_z, chunk_camera_x, chunk_camera_y, chunk_camera_z);
+          bool in_view = isnan(chunk_camera_angle) || chunk_camera_angle < fov;
 
-        chunk_in_fov = chunk_in_fov || in_view;
+          chunk_in_fov = chunk_in_fov || in_view;
 
+          if (chunk_in_fov)
+            break;
+        }
         if (chunk_in_fov)
           break;
       }
       if (chunk_in_fov)
         break;
     }
-    if (chunk_in_fov)
-      break;
   }
 
   if (!chunk_in_fov)
