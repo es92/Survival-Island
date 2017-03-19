@@ -15,6 +15,24 @@ using namespace std;
 
 // =============================
 
+int get_block_tex_x(Block_Type b){
+  if (Block_Type::Debug == b){
+    return 0;
+  } else if (Block_Type::Water == b){
+    return 1;
+  }
+}
+
+int get_block_tex_y(Block_Type b){
+  if (Block_Type::Debug == b){
+    return 0;
+  } else if (Block_Type::Water == b){
+    return 0;
+  }
+}
+
+// =============================
+
 void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
   int x, y, z;
   tie(x, y, z) = xyz;
@@ -28,9 +46,9 @@ void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
       for (int y = 0; y < CHUNK_SIZE; y++){
         for (int z = 0; z < CHUNK_SIZE; z++){
           XYZ block_xyz = XYZ(cx+x, cy+y, cz+z);
-          bool exists = gen.get_block(block_xyz);
-          if (exists){
-            blocks.insert(block_xyz);
+          Block_Type b = gen.get_block(block_xyz);
+          if (b != Block_Type::Empty){
+            blocks.insert({ block_xyz, b });
 
             //maybe_needs_update.insert(XYZ(cx+x+1, cy+y+0, cz+z+0));
             //maybe_needs_update.insert(XYZ(cx+x-1, cy+y+0, cz+z+0));
@@ -48,15 +66,28 @@ void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
 
 }
 
-bool World_DB::get_block(World_Gen& gen, XYZ xyz){
+bool World_DB::has_block(World_Gen& gen, XYZ xyz){
   maybe_gen_chunk(gen, xyz);
   return blocks.find(xyz) != blocks.end();
 }
 
-void World_DB::set_block(World_Gen& gen, bool exists, XYZ xyz){
+Block_Type World_DB::get_block(World_Gen& gen, XYZ xyz){
   maybe_gen_chunk(gen, xyz);
-  if (exists){
-    blocks.insert(xyz);
+  if (blocks.find(xyz) == blocks.end()){
+    return Block_Type::Empty;
+  } else {
+    return blocks.find(xyz)->second;
+  }
+}
+
+
+void World_DB::set_block(World_Gen& gen, Block_Type b, XYZ xyz){
+  maybe_gen_chunk(gen, xyz);
+  if (b != Block_Type::Empty){
+    if (blocks.find(xyz) != blocks.end()){
+      blocks.erase(xyz);
+    }
+    blocks.insert({xyz, b});
   } else {
     if (blocks.find(xyz) != blocks.end()){
       blocks.erase(xyz);
@@ -66,10 +97,12 @@ void World_DB::set_block(World_Gen& gen, bool exists, XYZ xyz){
 
 // =============================
 
-bool World_Gen::get_block(XYZ xyz){
-  int mode = SEED;
+Block_Type World_Gen::get_block(XYZ xyz){
+  int mode = FIELD;
   int x, y, z;
   tie(x, y, z) = xyz;
+
+  bool exists;
 
   if (mode == HILLS) {
     x = (x + 64*1000000) % 128;
@@ -81,26 +114,35 @@ bool World_Gen::get_block(XYZ xyz){
     x /= 4;
     z /= 4;
 
-    return (x*x + z*z < -y+32 || y == -32) && y > -33;
+    exists = (x*x + z*z < -y+32 || y == -32) && y > -33;
   } else if (mode == CUBE_FIELD) {
-    return (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
+    exists = (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
   } else if (mode == SMALL_CUBE) {
-    return abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
+    exists = abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
   } else if (mode == FIELD) {
-    return (y < -3);
+    exists = (y < -3);
   } else if (mode == SEED) {
-    return x == 1 && y == -1 && z == -6;
+    exists = x == 1 && y == -1 && z == -6;
+  }
+  if (exists){
+    return Block_Type::Debug;
+  } else {
+    return Block_Type::Empty;
   }
 }
 
 // =============================
 
-bool get_block(World& world, int x, int y, int z){
+bool has_block(World& world, int x, int y, int z){
+  return world.db.has_block(world.gen, XYZ(x, y, z));
+}
+
+Block_Type get_block(World& world, int x, int y, int z){
   return world.db.get_block(world.gen, XYZ(x, y, z));
 }
 
-void set_block(World& world, bool exists, int x, int y, int z){
-  world.db.set_block(world.gen, exists, XYZ(x, y, z));
+void set_block(World& world, Block_Type b, int x, int y, int z){
+  world.db.set_block(world.gen, b, XYZ(x, y, z));
 
   world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z)));
   if (x == 0){
@@ -120,6 +162,7 @@ void set_block(World& world, bool exists, int x, int y, int z){
   }
 
 
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z+0));
   world.db.maybe_needs_update.insert(XYZ(x+1, y+0, z+0));
   world.db.maybe_needs_update.insert(XYZ(x-1, y+0, z+0));
   world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z+0));

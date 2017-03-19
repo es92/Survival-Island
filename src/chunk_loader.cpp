@@ -160,9 +160,9 @@ void set_chunks(bool player_moved_chunks, unordered_set<XYZ> changed_chunks){
     tie(x, y, z) = *it;
 
     int horizon = CHUNK_SIZE*render_state.render_dist;
-    if (   pcx - horizon < x && pcx + horizon > x
-        && pcy - horizon < y && pcy + horizon > y
-        && pcz - horizon < z && pcz + horizon > z){
+    if (   pcx - horizon <= x && pcx + horizon >= x
+        && pcy - horizon <= y && pcy + horizon >= y
+        && pcz - horizon <= z && pcz + horizon >= z){
 
       xyzs_to_load.insert(XYZ(x, y, z));
     }

@@ -112,7 +112,7 @@ void step() {
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 
-  if (state.step > 60 && state.step % 100 == 0){
+  if (state.step > 60 && state.step % 10 == 0){
     step_automata(state.world, state.automata);
   }
 
@@ -202,7 +202,7 @@ void process_event(Event* e) {
       int y = -render_state.player_y - sin_vert_ang*4;
 
       if (state.lock_pointer){
-        set_block(state.world, true, x, y, z);
+        set_block(state.world, Block_Type::Water, x, y, z);
       }
 
     } else if (me->button_state == GLUT_UP) {

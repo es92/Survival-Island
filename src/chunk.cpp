@@ -173,12 +173,12 @@ void init_faces_elems(Faces& faces, int cx, int cy, int cz, World& world){
   faces.index = 0;
 }
 
-void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z){
+void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, int tex_x, int tex_y){
   vector<GLfloat> face_tex_coords({
-    0.0, 0.0,
-    0.0, 1.0,
-    1.0, 0.0,
-    1.0, 1.0,
+    1.f*tex_x/TEX_W,     1.f*tex_y/TEX_H,
+    1.f*tex_x/TEX_W,     1.f*(tex_y+1)/TEX_H,
+    1.f*(tex_x+1)/TEX_W, 1.f*tex_y/TEX_H,
+    1.f*(tex_x+1)/TEX_W, 1.f*(tex_y+1)/TEX_H,
   });
 
   vector<GLushort> face_elements({
@@ -256,37 +256,42 @@ void init_chunk_cubes(Chunk& chunk, int cx, int cy, int cz, World& world){
   for (int x = 0; x < X; x++){
     for (int y = 0; y < Y; y++){
       for (int z = 0; z < Z; z++){
-        if (!get_block(world, cx+x, cy+y, cz+z))
+        if (!has_block(world, cx+x, cy+y, cz+z))
           continue;
-        bool x_pos_block = get_block(world, cx+x+1, cy+y, cz+z);
-        bool x_neg_block = get_block(world, cx+x-1, cy+y, cz+z);
-        bool y_pos_block = get_block(world, cx+x, cy+y+1, cz+z);
-        bool y_neg_block = get_block(world, cx+x, cy+y-1, cz+z);
-        bool z_pos_block = get_block(world, cx+x, cy+y, cz+z+1);
-        bool z_neg_block = get_block(world, cx+x, cy+y, cz+z-1);
+        bool x_pos_block = has_block(world, cx+x+1, cy+y, cz+z);
+        bool x_neg_block = has_block(world, cx+x-1, cy+y, cz+z);
+        bool y_pos_block = has_block(world, cx+x, cy+y+1, cz+z);
+        bool y_neg_block = has_block(world, cx+x, cy+y-1, cz+z);
+        bool z_pos_block = has_block(world, cx+x, cy+y, cz+z+1);
+        bool z_neg_block = has_block(world, cx+x, cy+y, cz+z-1);
+
+        Block_Type b = get_block(world, cx+x, cy+y, cz+z);
+
+        int tex_x = get_block_tex_x(b);
+        int tex_y = get_block_tex_y(b);
 
         if (!x_pos_block){
-          add_face(chunk.x_pos, 0, 1, x, y, z);
+          add_face(chunk.x_pos, 0, 1, x, y, z, tex_x, tex_y);
         }
 
         if (!x_neg_block){
-          add_face(chunk.x_neg, 0, 0, x, y, z);
+          add_face(chunk.x_neg, 0, 0, x, y, z, tex_x, tex_y);
         }
 
         if (!y_pos_block){
-          add_face(chunk.y_pos, 1, 1, x, y, z);
+          add_face(chunk.y_pos, 1, 1, x, y, z, tex_x, tex_y);
         }
 
         if (!y_neg_block){
-          add_face(chunk.y_neg, 1, 0, x, y, z);
+          add_face(chunk.y_neg, 1, 0, x, y, z, tex_x, tex_y);
         }
 
         if (!z_pos_block){
-          add_face(chunk.z_pos, 2, 1, x, y, z);
+          add_face(chunk.z_pos, 2, 1, x, y, z, tex_x, tex_y);
         }
 
         if (!z_neg_block){
-          add_face(chunk.z_neg, 2, 0, x, y, z);
+          add_face(chunk.z_neg, 2, 0, x, y, z, tex_x, tex_y);
         }
       }
     }
