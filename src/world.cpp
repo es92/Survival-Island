@@ -15,18 +15,18 @@ using namespace std;
 
 // =============================
 
-int get_block_tex_x(Block_Type b){
-  if (Block_Type::Debug == b){
+int get_block_tex_x(Block b){
+  if (Block_Type::Debug == b.type){
     return 0;
-  } else if (Block_Type::Water == b){
+  } else if (Block_Type::Water == b.type){
     return 1;
   }
 }
 
-int get_block_tex_y(Block_Type b){
-  if (Block_Type::Debug == b){
+int get_block_tex_y(Block b){
+  if (Block_Type::Debug == b.type){
     return 0;
-  } else if (Block_Type::Water == b){
+  } else if (Block_Type::Water == b.type){
     return 0;
   }
 }
@@ -46,8 +46,8 @@ void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
       for (int y = 0; y < CHUNK_SIZE; y++){
         for (int z = 0; z < CHUNK_SIZE; z++){
           XYZ block_xyz = XYZ(cx+x, cy+y, cz+z);
-          Block_Type b = gen.get_block(block_xyz);
-          if (b != Block_Type::Empty){
+          Block b = gen.get_block(block_xyz);
+          if (b.type != Block_Type::Empty){
             blocks.insert({ block_xyz, b });
 
             //maybe_needs_update.insert(XYZ(cx+x+1, cy+y+0, cz+z+0));
@@ -71,19 +71,19 @@ bool World_DB::has_block(World_Gen& gen, XYZ xyz){
   return blocks.find(xyz) != blocks.end();
 }
 
-Block_Type World_DB::get_block(World_Gen& gen, XYZ xyz){
+Block World_DB::get_block(World_Gen& gen, XYZ xyz){
   maybe_gen_chunk(gen, xyz);
   if (blocks.find(xyz) == blocks.end()){
-    return Block_Type::Empty;
+    return Empty_Block;
   } else {
     return blocks.find(xyz)->second;
   }
 }
 
 
-void World_DB::set_block(World_Gen& gen, Block_Type b, XYZ xyz){
+void World_DB::set_block(World_Gen& gen, Block b, XYZ xyz){
   maybe_gen_chunk(gen, xyz);
-  if (b != Block_Type::Empty){
+  if (b.type != Block_Type::Empty){
     if (blocks.find(xyz) != blocks.end()){
       blocks.erase(xyz);
     }
@@ -97,7 +97,7 @@ void World_DB::set_block(World_Gen& gen, Block_Type b, XYZ xyz){
 
 // =============================
 
-Block_Type World_Gen::get_block(XYZ xyz){
+Block World_Gen::get_block(XYZ xyz){
   int mode = FIELD;
   int x, y, z;
   tie(x, y, z) = xyz;
@@ -125,9 +125,9 @@ Block_Type World_Gen::get_block(XYZ xyz){
     exists = x == 1 && y == -1 && z == -6;
   }
   if (exists){
-    return Block_Type::Debug;
+    return Debug_Block;
   } else {
-    return Block_Type::Empty;
+    return Empty_Block;
   }
 }
 
@@ -137,11 +137,11 @@ bool has_block(World& world, int x, int y, int z){
   return world.db.has_block(world.gen, XYZ(x, y, z));
 }
 
-Block_Type get_block(World& world, int x, int y, int z){
+Block get_block(World& world, int x, int y, int z){
   return world.db.get_block(world.gen, XYZ(x, y, z));
 }
 
-void set_block(World& world, Block_Type b, int x, int y, int z){
+void set_block(World& world, Block b, int x, int y, int z){
   world.db.set_block(world.gen, b, XYZ(x, y, z));
 
   world.cc.insert(XYZ(snap_to_chunk(x), snap_to_chunk(y), snap_to_chunk(z)));

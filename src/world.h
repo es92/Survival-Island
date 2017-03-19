@@ -1,4 +1,3 @@
-
 #ifndef WORLD_
 #define WORLD_
 
@@ -9,14 +8,14 @@ using boost::unordered_set;
 #include <boost/unordered_map.hpp>
 using  boost::unordered::unordered_map;
 
-enum Block_Type { Empty, Debug, Water };
+#include "blocks.h"
 
 // =============================
 
 class World_Gen {
   public:
     World_Gen(){ };
-    Block_Type get_block(XYZ xyz);
+    Block get_block(XYZ xyz);
 };
 
 // =============================
@@ -25,12 +24,12 @@ class World_DB {
   public:
     World_DB(){ };
     bool has_block(World_Gen& gen, XYZ xyz);
-    Block_Type get_block(World_Gen& gen, XYZ xyz);
-    void set_block(World_Gen& gen, Block_Type b, XYZ xyz);
+    Block get_block(World_Gen& gen, XYZ xyz);
+    void set_block(World_Gen& gen, Block b, XYZ xyz);
     unordered_set<XYZ> maybe_needs_update;
   private:
     void maybe_gen_chunk(World_Gen& gen, XYZ xyz);
-    unordered_map<XYZ, Block_Type> blocks;
+    unordered_map<XYZ, Block> blocks;
     unordered_set<XYZ> initialized_chunks;
 };
 
@@ -44,13 +43,13 @@ typedef struct World_ {
 } World;
 
 bool has_block(World& world, int x, int y, int z);
-Block_Type get_block(World& world, int x, int y, int z);
-void set_block(World& world, Block_Type b, int x, int y, int z);
+Block get_block(World& world, int x, int y, int z);
+void set_block(World& world, Block b, int x, int y, int z);
 
 // =============================
 
-int get_block_tex_x(Block_Type b);
-int get_block_tex_y(Block_Type b);
+int get_block_tex_x(Block b);
+int get_block_tex_y(Block b);
 
 
 unordered_set<XYZ> get_changed_chunks(World& world);

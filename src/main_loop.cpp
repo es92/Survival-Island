@@ -202,7 +202,7 @@ void process_event(Event* e) {
       int y = -render_state.player_y - sin_vert_ang*4;
 
       if (state.lock_pointer){
-        set_block(state.world, Block_Type::Water, x, y, z);
+        set_block(state.world, Block(Water_Block), x, y, z);
       }
 
     } else if (me->button_state == GLUT_UP) {

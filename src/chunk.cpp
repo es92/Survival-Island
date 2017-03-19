@@ -271,7 +271,7 @@ void init_chunk_cubes(Chunk& chunk, int cx, int cy, int cz, World& world){
         bool z_pos_block = has_block(world, cx+x, cy+y, cz+z+1);
         bool z_neg_block = has_block(world, cx+x, cy+y, cz+z-1);
 
-        Block_Type b = get_block(world, cx+x, cy+y, cz+z);
+        Block b = get_block(world, cx+x, cy+y, cz+z);
 
         int tex_x = get_block_tex_x(b);
         int tex_y = get_block_tex_y(b);

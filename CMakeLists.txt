@@ -68,6 +68,7 @@ add_executable(my_game
                         ../src/chunk.cpp 
                         ../src/chunk_loader.cpp 
                         ../src/world.cpp 
+                        ../src/blocks.cpp 
                         ../src/automata.cpp 
               )
 #==================================================
