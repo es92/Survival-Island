@@ -7,4 +7,5 @@ rendering
 
 automata
   water
+    instead of propagating flow propagate force (default is down)
   plants

@@ -112,6 +112,10 @@ void step() {
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 
+  //if (state.step > 60 && state.step % 50 == 0){
+  //  set_block(state.world, Block(Water_Block), 0, 0, -4);
+  //}
+
   if (state.step > 60 && state.step % 10 == 0){
     step_automata(state.world, state.automata);
   }

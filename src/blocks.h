@@ -1,4 +1,6 @@
 
+#include <tuple>
+
 enum Block_Type { Empty, Debug, Water };
 
 typedef struct Block_ {
@@ -12,6 +14,16 @@ extern Block Debug_Block;
 
 extern Block Water_Block;
 
-Block mk_water_block(short water_level, bool on_ground);
-bool water_block_on_ground(Block b);
-short water_block_water_level(Block b);
+//enum Flow_Dir { None, Y_Neg, X_Pos, X_Neg, Z_Pos, Z_Neg };
+//
+//Block mk_water_block(Flow_Dir flow_dir);
+//Flow_Dir water_block_flow_dir(Block b);
+
+
+typedef std::tuple<short, short, short> Flow_Force;
+
+Block mk_water_block(Flow_Force flow_force);
+Flow_Force water_block_flow_force(Block b);
+
+bool operator==(const Block& a, const Block& b);
+bool operator!=(const Block& a, const Block& b);

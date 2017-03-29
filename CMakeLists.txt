@@ -70,6 +70,7 @@ add_executable(my_game
                         ../src/world.cpp 
                         ../src/blocks.cpp 
                         ../src/automata.cpp 
+                        ../src/automata_ruleset.cpp 
               )
 #==================================================
 # Linking

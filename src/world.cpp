@@ -162,13 +162,24 @@ void set_block(World& world, Block b, int x, int y, int z){
   }
 
 
+
+  world.db.maybe_needs_update.insert(XYZ(x+0, y-1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+1, y-1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x-1, y-1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y-1, z+1));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y-1, z-1));
+
   world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z+0));
   world.db.maybe_needs_update.insert(XYZ(x+1, y+0, z+0));
   world.db.maybe_needs_update.insert(XYZ(x-1, y+0, z+0));
-  world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z+0));
-  world.db.maybe_needs_update.insert(XYZ(x+0, y-1, z+0));
   world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z+1));
   world.db.maybe_needs_update.insert(XYZ(x+0, y+0, z-1));
+
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+1, y+1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x-1, y+1, z+0));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z+1));
+  world.db.maybe_needs_update.insert(XYZ(x+0, y+1, z-1));
 }
 
 unordered_set<XYZ> get_changed_chunks(World& world){
