@@ -7,5 +7,6 @@ rendering
 
 automata
   water
+    spread in multiple directions
     instead of propagating flow propagate force (default is down)
   plants

@@ -1,5 +1,6 @@
 
 #include <tuple>
+#include <array>
 
 enum Block_Type { Empty, Debug, Water };
 
@@ -8,22 +9,25 @@ typedef struct Block_ {
   short data[8];
 } Block;
 
+const short MAX_WATER_LEVEL = 16;
+
+bool operator==(const Block& a, const Block& b);
+bool operator!=(const Block& a, const Block& b);
+
 extern Block Empty_Block;
 
 extern Block Debug_Block;
 
 extern Block Water_Block;
 
-//enum Flow_Dir { None, Y_Neg, X_Pos, X_Neg, Z_Pos, Z_Neg };
-//
-//Block mk_water_block(Flow_Dir flow_dir);
-//Flow_Dir water_block_flow_dir(Block b);
+typedef std::array<short, 6> Flows;
+
+Block mk_water_block(Flows flows, int level);
+Block mk_water_block(Flows flows, int level);
+Flows water_block_flows(const Block& b);
+int water_block_level(const Block& b);
 
 
-typedef std::tuple<short, short, short> Flow_Force;
-
-Block mk_water_block(Flow_Force flow_force);
-Flow_Force water_block_flow_force(Block b);
-
-bool operator==(const Block& a, const Block& b);
-bool operator!=(const Block& a, const Block& b);
+int get_block_tex_x(Block b);
+int get_block_tex_y(Block b);
+float get_block_height(Block b);

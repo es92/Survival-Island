@@ -2,6 +2,8 @@
 
 #include "blocks.h"
 
+using namespace std;
+
 Block Empty_Block = {
   .type = Block_Type::Empty,
 };
@@ -12,14 +14,14 @@ Block Debug_Block = {
 
 Block Water_Block = {
   .type = Block_Type::Water,
-  { 0, 0, 0, 0 },
+  { MAX_WATER_LEVEL, 0, 0, 0 },
 };
 
 bool operator==(const Block& a, const Block& b){
   if (a.type != b.type){
     return false;
   } else {
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 8; i++){
       if (a.data[i] != b.data[i]){
         return false;
       }
@@ -32,28 +34,50 @@ bool operator!=(const Block& a, const Block& b){
   return !(a == b);
 }
 
-//Block mk_water_block(Flow_Dir flow_dir){
-//  Block b;
-//  b.type = Block_Type::Water;
-//  b.data[0] = flow_dir;
-//  return b;
-//}
-//
-//Flow_Dir water_block_flow_dir(Block b){
-//  return static_cast<Flow_Dir>(b.data[0]);
-//}
-
-Block mk_water_block(Flow_Force flow_force){
+Block mk_water_block(Flows flows, int level){
   Block b;
   b.type = Block_Type::Water;
-  short x, y, z;
-  std::tie(x, y, z) = flow_force;
-  b.data[0] = x;
-  b.data[1] = y;
-  b.data[2] = z;
+  b.data[0] = level;
+  for (int i = 0; i < 6; i++){
+    b.data[i+1] = flows[i];
+  }
   return b;
 }
 
-Flow_Force water_block_flow_force(Block b){
-  return Flow_Force(b.data[0], b.data[1], b.data[2]);
+Flows water_block_flows(const Block& b){
+  Flows f;
+  for (int i = 0; i < 6; i++){
+    f[i] = b.data[i+1];
+  }
+  return f;
+}
+
+int water_block_level(const Block& b){
+  return b.data[0];
+}
+
+// =============================
+
+int get_block_tex_x(Block b){
+  if (Block_Type::Debug == b.type){
+    return 0;
+  } else if (Block_Type::Water == b.type){
+    return 1;
+  }
+}
+
+int get_block_tex_y(Block b){
+  if (Block_Type::Debug == b.type){
+    return 0;
+  } else if (Block_Type::Water == b.type){
+    return 0;
+  }
+}
+
+float get_block_height(Block b){
+  if (Block_Type::Debug == b.type){
+    return 1;
+  } else if (Block_Type::Water == b.type){
+    return min(water_block_level(b)*1. / MAX_WATER_LEVEL, 1.0);
+  }
 }

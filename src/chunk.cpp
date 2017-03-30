@@ -179,7 +179,7 @@ void init_faces_elems(Faces& faces, int cx, int cy, int cz, World& world){
   faces.index = 0;
 }
 
-void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, int tex_x, int tex_y){
+void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float ex, float ey, float ez, int tex_x, int tex_y){
   vector<GLfloat> face_tex_coords({
     1.f*tex_x/TEX_W,     1.f*tex_y/TEX_H,
     1.f*tex_x/TEX_W,     1.f*(tex_y+1)/TEX_H,
@@ -195,51 +195,64 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, int tex
   vector<GLfloat> face_vertices;
   if (axis == 0 && axis_val == 1){
     face_vertices = {
-      x+1.f, y+0.f, z+0.f,
-      x+1.f, y+0.f, z+1.f,            
-      x+1.f, y+1.f, z+0.f,
-      x+1.f, y+1.f, z+1.f,
+      x+ex , y+0.f, z+0.f,
+      x+ex , y+0.f, z+ez ,            
+      x+ex , y+ey , z+0.f,
+      x+ex , y+ey , z+ez ,
     };
   } else if (axis == 0 && axis_val == 0){
     face_vertices = {
       x+0.f, y+0.f, z+0.f,
-      x+0.f, y+1.f, z+0.f,
-      x+0.f, y+0.f, z+1.f,            
-      x+0.f, y+1.f, z+1.f,
+      x+0.f, y+ey , z+0.f,
+      x+0.f, y+0.f, z+ez ,            
+      x+0.f, y+ey , z+ez ,
     };
   } else if (axis == 1 && axis_val == 1){
     face_vertices = {
-      x+0.f, y+1.f, z+0.f,
-      x+1.f, y+1.f, z+0.f,
-      x+0.f, y+1.f, z+1.f,            
-      x+1.f, y+1.f, z+1.f,
+      x+0.f, y+ey , z+0.f,
+      x+ex , y+ey , z+0.f,
+      x+0.f, y+ey , z+ez ,            
+      x+ex , y+ey , z+ez ,
     };
   } else if (axis == 1 && axis_val == 0){
     face_vertices = {
       x+0.f, y+0.f, z+0.f,
-      x+0.f, y+0.f, z+1.f,            
-      x+1.f, y+0.f, z+0.f,
-      x+1.f, y+0.f, z+1.f,
+      x+0.f, y+0.f, z+ez ,            
+      x+ex , y+0.f, z+0.f,
+      x+ex , y+0.f, z+ez ,
     };
   } else if (axis == 2 && axis_val == 1){
     face_vertices = {
-      x+0.f, y+0.f, z+1.f,
-      x+0.f, y+1.f, z+1.f,            
-      x+1.f, y+0.f, z+1.f,
-      x+1.f, y+1.f, z+1.f,
+      x+0.f, y+0.f, z+ez ,
+      x+0.f, y+ey , z+ez ,            
+      x+ex , y+0.f, z+ez ,
+      x+ex , y+ey , z+ez ,
     };
   } else if (axis == 2 && axis_val == 0){
     face_vertices = {
       x+0.f, y+0.f, z+0.f,
-      x+1.f, y+0.f, z+0.f,
-      x+0.f, y+1.f, z+0.f,            
-      x+1.f, y+1.f, z+0.f,
+      x+ex , y+0.f, z+0.f,
+      x+0.f, y+ey , z+0.f,            
+      x+ex , y+ey , z+0.f,
     };
   }
   faces.index += 4;
   faces.vertices.insert(faces.vertices.begin(), face_vertices.begin(), face_vertices.end());
   faces.tex_coords.insert(faces.tex_coords.begin(), face_tex_coords.begin(), face_tex_coords.end());
   faces.elements.insert(faces.elements.begin(), face_elements.begin(), face_elements.end());
+}
+
+bool has_covering_block(World& w, int x, int y, int z){
+  if (!has_block(w, x, y, z)){
+    return false;
+  } else {
+    Block b = get_block(w, x, y, z);
+    if (b.type == Block_Type::Water && water_block_level(b) != MAX_WATER_LEVEL){
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 void init_chunk_cubes(Chunk& chunk, int cx, int cy, int cz, World& world){
@@ -264,40 +277,42 @@ void init_chunk_cubes(Chunk& chunk, int cx, int cy, int cz, World& world){
       for (int z = 0; z < Z; z++){
         if (!has_block(world, cx+x, cy+y, cz+z))
           continue;
-        bool x_pos_block = has_block(world, cx+x+1, cy+y, cz+z);
-        bool x_neg_block = has_block(world, cx+x-1, cy+y, cz+z);
-        bool y_pos_block = has_block(world, cx+x, cy+y+1, cz+z);
-        bool y_neg_block = has_block(world, cx+x, cy+y-1, cz+z);
-        bool z_pos_block = has_block(world, cx+x, cy+y, cz+z+1);
-        bool z_neg_block = has_block(world, cx+x, cy+y, cz+z-1);
+        bool x_pos_block = has_covering_block(world, cx+x+1, cy+y, cz+z);
+        bool x_neg_block = has_covering_block(world, cx+x-1, cy+y, cz+z);
+        bool y_pos_block = has_covering_block(world, cx+x, cy+y+1, cz+z);
+        bool y_neg_block = has_covering_block(world, cx+x, cy+y-1, cz+z);
+        bool z_pos_block = has_covering_block(world, cx+x, cy+y, cz+z+1);
+        bool z_neg_block = has_covering_block(world, cx+x, cy+y, cz+z-1);
 
         Block b = get_block(world, cx+x, cy+y, cz+z);
 
         int tex_x = get_block_tex_x(b);
         int tex_y = get_block_tex_y(b);
 
+        float b_h = get_block_height(b);
+
         if (!x_pos_block){
-          add_face(chunk.x_pos, 0, 1, x, y, z, tex_x, tex_y);
+          add_face(chunk.x_pos, 0, 1, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
 
         if (!x_neg_block){
-          add_face(chunk.x_neg, 0, 0, x, y, z, tex_x, tex_y);
+          add_face(chunk.x_neg, 0, 0, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
 
         if (!y_pos_block){
-          add_face(chunk.y_pos, 1, 1, x, y, z, tex_x, tex_y);
+          add_face(chunk.y_pos, 1, 1, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
 
         if (!y_neg_block){
-          add_face(chunk.y_neg, 1, 0, x, y, z, tex_x, tex_y);
+          add_face(chunk.y_neg, 1, 0, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
 
         if (!z_pos_block){
-          add_face(chunk.z_pos, 2, 1, x, y, z, tex_x, tex_y);
+          add_face(chunk.z_pos, 2, 1, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
 
         if (!z_neg_block){
-          add_face(chunk.z_neg, 2, 0, x, y, z, tex_x, tex_y);
+          add_face(chunk.z_neg, 2, 0, x, y, z, 1, b_h, 1, tex_x, tex_y);
         }
       }
     }

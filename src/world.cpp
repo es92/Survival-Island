@@ -15,24 +15,6 @@ using namespace std;
 
 // =============================
 
-int get_block_tex_x(Block b){
-  if (Block_Type::Debug == b.type){
-    return 0;
-  } else if (Block_Type::Water == b.type){
-    return 1;
-  }
-}
-
-int get_block_tex_y(Block b){
-  if (Block_Type::Debug == b.type){
-    return 0;
-  } else if (Block_Type::Water == b.type){
-    return 0;
-  }
-}
-
-// =============================
-
 void World_DB::maybe_gen_chunk(World_Gen& gen, XYZ xyz){
   int x, y, z;
   tie(x, y, z) = xyz;
@@ -98,7 +80,7 @@ void World_DB::set_block(World_Gen& gen, Block b, XYZ xyz){
 // =============================
 
 Block World_Gen::get_block(XYZ xyz){
-  int mode = FIELD;
+  int mode = HILLS;
   int x, y, z;
   tie(x, y, z) = xyz;
 
