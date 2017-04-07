@@ -2,7 +2,7 @@
 #include <tuple>
 #include <array>
 
-enum Block_Type { Empty, Debug, Water };
+enum Block_Type { Empty, Debug, Water, Stone, Sand, Dirt, Grass };
 
 typedef struct Block_ {
   Block_Type type;
@@ -15,10 +15,12 @@ bool operator==(const Block& a, const Block& b);
 bool operator!=(const Block& a, const Block& b);
 
 extern Block Empty_Block;
-
 extern Block Debug_Block;
-
 extern Block Water_Block;
+extern Block Stone_Block;
+extern Block Sand_Block;
+extern Block Dirt_Block;
+extern Block Grass_Block;
 
 typedef std::array<short, 6> Flows;
 

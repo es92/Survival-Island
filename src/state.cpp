@@ -14,12 +14,12 @@ State state = {
 };
 
 Render_State render_state = {
-  .render_dist = 2,
+  .render_dist = 3,
   .angle = 0,
   .screen_width = 800,
   .screen_height = 600,
   .player_x = 0,
-  .player_y = 0,
+  .player_y = -16,
   .player_z = 0,
 };
 

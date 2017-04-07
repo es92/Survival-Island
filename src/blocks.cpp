@@ -17,6 +17,23 @@ Block Water_Block = {
   { MAX_WATER_LEVEL, 0, 0, 0 },
 };
 
+
+Block Stone_Block = {
+  .type = Block_Type::Stone
+};
+
+Block Sand_Block = {
+  .type = Block_Type::Sand
+};
+
+Block Dirt_Block = {
+  .type = Block_Type::Dirt
+};
+
+Block Grass_Block = {
+  .type = Block_Type::Grass
+};
+
 bool operator==(const Block& a, const Block& b){
   if (a.type != b.type){
     return false;
@@ -63,6 +80,14 @@ int get_block_tex_x(Block b){
     return 0;
   } else if (Block_Type::Water == b.type){
     return 1;
+  } else if (Block_Type::Stone == b.type){
+    return 2;
+  } else if (Block_Type::Sand == b.type){
+    return 3;
+  } else if (Block_Type::Dirt == b.type){
+    return 0;
+  } else if (Block_Type::Grass == b.type){
+    return 1;
   }
 }
 
@@ -71,13 +96,21 @@ int get_block_tex_y(Block b){
     return 0;
   } else if (Block_Type::Water == b.type){
     return 0;
+  } else if (Block_Type::Stone == b.type){
+    return 0;
+  } else if (Block_Type::Sand == b.type){
+    return 0;
+  } else if (Block_Type::Dirt == b.type){
+    return 1;
+  } else if (Block_Type::Grass == b.type){
+    return 1;
   }
 }
 
 float get_block_height(Block b){
-  if (Block_Type::Debug == b.type){
-    return 1;
-  } else if (Block_Type::Water == b.type){
+  if (Block_Type::Water == b.type){
     return min(water_block_level(b)*1. / MAX_WATER_LEVEL, 1.0);
+  } else {
+    return 1;
   }
 }

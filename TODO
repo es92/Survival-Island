@@ -1,12 +1,23 @@
 
+bugs
+  dropping water on ocean results in automata looking at whole ocean
+
 rendering
   simplify requests
     - don't load if load/unload later
   multiple background threads (number requests, throw in mutexed priority queue, add to main thread queue if next)
   infinite distance
+  look into instancing
 
 automata
   water
     spread in multiple directions
     instead of propagating flow propagate force (default is down)
   plants
+
+looks
+  directional shading
+
+world generation
+  height map
+    - diamond square, but noise as a function of scale (high noise if far apart, low noise if close together?)

@@ -80,9 +80,11 @@ int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, doub
 
   bool chunk_in_fov = false;
 
-  if (-x > chunk.x && -x < chunk.x + CHUNK_SIZE &&
-      -y > chunk.y && -y < chunk.y + CHUNK_SIZE &&
-      -y > chunk.y && -y < chunk.y + CHUNK_SIZE){
+  int CHUNK_MARGIN = 8;
+
+  if (-x > chunk.x - CHUNK_MARGIN && -x < chunk.x + CHUNK_SIZE + CHUNK_MARGIN &&
+      -y > chunk.y - CHUNK_MARGIN && -y < chunk.y + CHUNK_SIZE + CHUNK_MARGIN &&
+      -y > chunk.y - CHUNK_MARGIN && -y < chunk.y + CHUNK_SIZE + CHUNK_MARGIN){
     chunk_in_fov = true;
   } else {
     for (int cx = 0; cx <= 1; cx++){

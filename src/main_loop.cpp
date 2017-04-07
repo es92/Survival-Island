@@ -64,6 +64,27 @@ void step() {
 
   process_events();
 
+  if (down_mouse_buttons.find(0) != down_mouse_buttons.end()){
+
+
+    if (state.lock_pointer && state.step % 20 == 0){
+
+
+      float cos_ang = cos(render_state.player_ry/180*M_PI);
+      float sin_ang = sin(render_state.player_ry/180*M_PI);
+
+      float sin_vert_ang = sin(render_state.player_rx/180*M_PI);
+      float cos_vert_ang = cos(render_state.player_rx/180*M_PI);
+
+      int x = -render_state.player_x + cos_vert_ang*sin_ang*4;
+      int z = -render_state.player_z - cos_vert_ang*cos_ang*4;
+      int y = -render_state.player_y - sin_vert_ang*4;
+
+      //set_block(state.world, Block(Water_Block), x, y, z);
+      set_block(state.world, Block(mk_water_block({0, 0, 0, 0, 0, 0}, MAX_WATER_LEVEL/3)), x, y, z);
+    }
+  }
+
   if (down_special_keys.find(GLUT_KEY_UP) != down_special_keys.end()) {
     render_state.angle -= 45*MILLIS_PER_UPDATE/1000.;
   }
@@ -112,8 +133,8 @@ void step() {
     render_state.player_y -= sin_vert_ang*walking_speed*MILLIS_PER_UPDATE/1000.;
   }
 
-  if (state.step > 60 && state.step % 100 == 0){
-    set_block(state.world, Block(Water_Block), rand()%8, 16, rand()%8);
+  if (state.step > 60 && state.step % 50 == 0){
+    //set_block(state.world, Block(Water_Block), rand()%128-64, 16, rand()%128-64);
   }
 
   if (state.step > 60 && state.step % 10 == 0){
@@ -194,21 +215,6 @@ void process_event(Event* e) {
     Mouse_Event* me = static_cast<Mouse_Event*>(e);
     if (me->button_state == GLUT_DOWN) {
       down_mouse_buttons.insert(me->button);
-
-      float cos_ang = cos(render_state.player_ry/180*M_PI);
-      float sin_ang = sin(render_state.player_ry/180*M_PI);
-
-      float sin_vert_ang = sin(render_state.player_rx/180*M_PI);
-      float cos_vert_ang = cos(render_state.player_rx/180*M_PI);
-
-      int x = -render_state.player_x + cos_vert_ang*sin_ang*4;
-      int z = -render_state.player_z - cos_vert_ang*cos_ang*4;
-      int y = -render_state.player_y - sin_vert_ang*4;
-
-      if (state.lock_pointer){
-        //set_block(state.world, Block(Water_Block), x, y, z);
-        set_block(state.world, Block(mk_water_block({0, 0, 0, 0, 0, 0}, MAX_WATER_LEVEL/3)), x, y, z);
-      }
 
     } else if (me->button_state == GLUT_UP) {
       down_mouse_buttons.erase(me->button);

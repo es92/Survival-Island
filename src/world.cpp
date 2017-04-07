@@ -12,6 +12,7 @@ using namespace std;
 #define SMALL_CUBE 2
 #define FIELD 3
 #define SEED 4
+#define ISLAND 5
 
 // =============================
 
@@ -80,36 +81,59 @@ void World_DB::set_block(World_Gen& gen, Block b, XYZ xyz){
 // =============================
 
 Block World_Gen::get_block(XYZ xyz){
-  int mode = HILLS;
+  int mode = ISLAND;
   int x, y, z;
   tie(x, y, z) = xyz;
 
-  bool exists;
+  int H = 3;
 
-  if (mode == HILLS) {
-    x = (x + 64*1000000) % 128;
-    z = (z + 64*1000000) % 128;
+  x /= 8;
+  z /= 8;
 
-    x -= 64;
-    z -= 64;
-
-    x /= 4;
-    z /= 4;
-
-    exists = (x*x + z*z < -y+32 || y == -32) && y > -33;
-  } else if (mode == CUBE_FIELD) {
-    exists = (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
-  } else if (mode == SMALL_CUBE) {
-    exists = abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
-  } else if (mode == FIELD) {
-    exists = (y < -3);
-  } else if (mode == SEED) {
-    exists = x == 1 && y == -1 && z == -6;
-  }
-  if (exists){
-    return Debug_Block;
+  if (mode == ISLAND) {
+    bool land = (sqrt(x*x + z*z) < -y+H) && y > -(H+1);
+    if (land){
+      if (y == -1) {
+        return Sand_Block;
+      } else if (y == 0){
+        return Dirt_Block;
+      } else if (y == 1){
+        return Grass_Block;
+      } else {
+        return Stone_Block;
+      }
+    } else if (y < 0){
+      return Water_Block;
+    } else {
+      return Empty_Block;
+    }
   } else {
-    return Empty_Block;
+    bool exists;
+    if (mode == HILLS) {
+      x = (x + 64*1000000) % 128;
+      z = (z + 64*1000000) % 128;
+
+      x -= 64;
+      z -= 64;
+
+      x /= 4;
+      z /= 4;
+
+      exists = (x*x + z*z < -y+32 || y == -32) && y > -33;
+    } else if (mode == CUBE_FIELD) {
+      exists = (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
+    } else if (mode == SMALL_CUBE) {
+      exists = abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
+    } else if (mode == FIELD) {
+      exists = (y < -3);
+    } else if (mode == SEED) {
+      exists = x == 1 && y == -1 && z == -6;
+    }
+    if (exists){
+      return Debug_Block;
+    } else {
+      return Empty_Block;
+    }
   }
 }
 
