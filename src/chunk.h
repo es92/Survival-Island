@@ -21,10 +21,12 @@ typedef struct Faces_ {
   vector<GLushort> elements;
   vector<GLfloat> vertices;
   vector<GLfloat> tex_coords;
+  vector<GLfloat> brightness;
 
   GLuint ibo_elements;
   GLuint vbo_vertices;
   GLuint vbo_tex_coords;
+  GLuint vbo_brightness;
 
   bool empty;
 
@@ -42,6 +44,7 @@ typedef struct Chunk_ {
 
   GLint attribute_coord3d;
   GLint attribute_v_tex_coord;
+  GLint attribute_brightness;
 
   bool empty;
 } Chunk;

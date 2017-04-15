@@ -26,10 +26,10 @@ int draw_faces(Chunk& chunk, Faces& faces){
   if (faces.empty){
     return 0;
   }
-  glEnableVertexAttribArray(chunk.attribute_coord3d);
 
   int size;
 
+  glEnableVertexAttribArray(chunk.attribute_coord3d);
   glBindBuffer(GL_ARRAY_BUFFER, faces.vbo_vertices);
   glVertexAttribPointer(
     chunk.attribute_coord3d, // attribute
@@ -51,12 +51,24 @@ int draw_faces(Chunk& chunk, Faces& faces){
     0                  // offset of first element
   );
 
+  glEnableVertexAttribArray(chunk.attribute_brightness);
+  glBindBuffer(GL_ARRAY_BUFFER, faces.vbo_brightness);
+  glVertexAttribPointer(
+    chunk.attribute_brightness, // attribute
+    1,                 // number of elements per vertex, here (R,G,B)
+    GL_FLOAT,          // the type of each element
+    GL_FALSE,          // take our values as-is
+    0,                 // no extra data between each position
+    0                  // offset of first element
+  );
+
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, faces.ibo_elements);
   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
   glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 
   glDisableVertexAttribArray(chunk.attribute_coord3d);
+  glDisableVertexAttribArray(chunk.attribute_brightness);
   glDisableVertexAttribArray(chunk.attribute_v_tex_coord);
 
   return size;
@@ -159,6 +171,7 @@ int draw_chunk(glm::mat4 projection_view, Chunk& chunk, double x, double y, doub
 void unload_faces(Faces& faces){
   glDeleteBuffers(1, &faces.vbo_vertices);
   glDeleteBuffers(1, &faces.vbo_tex_coords);
+  glDeleteBuffers(1, &faces.vbo_brightness);
   glDeleteBuffers(1, &faces.ibo_elements);
 }
 
@@ -194,6 +207,10 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
     (short unsigned int)(faces.index+3), (short unsigned int)(faces.index+1), (short unsigned int)(faces.index+2),
   });
 
+  vector<GLfloat> brightness;
+
+  float b = 1.0;
+
   vector<GLfloat> face_vertices;
   if (axis == 0 && axis_val == 1){
     face_vertices = {
@@ -202,6 +219,7 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
       x+ex , y+ey , z+0.f,
       x+ex , y+ey , z+ez ,
     };
+    b = .95;
   } else if (axis == 0 && axis_val == 0){
     face_vertices = {
       x+0.f, y+0.f, z+0.f,
@@ -209,6 +227,7 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
       x+0.f, y+0.f, z+ez ,            
       x+0.f, y+ey , z+ez ,
     };
+    b = .8;
   } else if (axis == 1 && axis_val == 1){
     face_vertices = {
       x+0.f, y+ey , z+0.f,
@@ -223,6 +242,7 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
       x+ex , y+0.f, z+0.f,
       x+ex , y+0.f, z+ez ,
     };
+    b = .7;
   } else if (axis == 2 && axis_val == 1){
     face_vertices = {
       x+0.f, y+0.f, z+ez ,
@@ -230,6 +250,7 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
       x+ex , y+0.f, z+ez ,
       x+ex , y+ey , z+ez ,
     };
+    b = .9;
   } else if (axis == 2 && axis_val == 0){
     face_vertices = {
       x+0.f, y+0.f, z+0.f,
@@ -237,11 +258,21 @@ void add_face(Faces& faces, int axis, int axis_val, int x, int y, int z, float e
       x+0.f, y+ey , z+0.f,            
       x+ex , y+ey , z+0.f,
     };
+    b = .9;
   }
+
+  brightness = {
+    b,
+    b,
+    b,
+    b,
+  };
+
   faces.index += 4;
   faces.vertices.insert(faces.vertices.begin(), face_vertices.begin(), face_vertices.end());
   faces.tex_coords.insert(faces.tex_coords.begin(), face_tex_coords.begin(), face_tex_coords.end());
   faces.elements.insert(faces.elements.begin(), face_elements.begin(), face_elements.end());
+  faces.brightness.insert(faces.brightness.begin(), brightness.begin(), brightness.end());
 }
 
 bool has_covering_block(World& w, int x, int y, int z){
@@ -344,6 +375,10 @@ void init_faces_gl(Faces& faces){
   glBindBuffer(GL_ARRAY_BUFFER, faces.vbo_tex_coords);
   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*faces.tex_coords.size(), &faces.tex_coords[0], GL_STATIC_DRAW);
 
+  glGenBuffers(1, &faces.vbo_brightness);
+  glBindBuffer(GL_ARRAY_BUFFER, faces.vbo_brightness);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*faces.brightness.size(), &faces.brightness[0], GL_STATIC_DRAW);
+
   glGenBuffers(1, &faces.ibo_elements);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, faces.ibo_elements);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*faces.elements.size(), &faces.elements[0], GL_STATIC_DRAW);
@@ -368,6 +403,12 @@ bool init_chunk_gl(Chunk& chunk, GLuint program, int cx, int cy, int cz, World& 
   attribute_name = "v_tex_coord";
   chunk.attribute_v_tex_coord = glGetAttribLocation(program, attribute_name);
   if (chunk.attribute_v_tex_coord == -1) {
+    cerr << "Could not bind attribute " << attribute_name << endl;
+    return false;
+  }
+  attribute_name = "brightness";
+  chunk.attribute_brightness = glGetAttribLocation(program, attribute_name);
+  if (chunk.attribute_brightness == -1) {
     cerr << "Could not bind attribute " << attribute_name << endl;
     return false;
   }
