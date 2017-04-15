@@ -59,20 +59,20 @@ add_executable(my_game
                         ../src/main.cpp 
                         ../src/display.cpp 
                         ../src/main_loop.cpp 
-                        ../src/utils.cpp 
                         ../src/state.cpp
-                        ../src/events.cpp
-                        ../src/shader_utils.cpp 
 
-                        ../src/async_chunk_action_stream.cpp 
+                        ../src/utils/utils.cpp 
+                        ../src/utils/events.cpp
+                        ../src/utils/shader_utils.cpp 
+                        ../src/utils/async_chunk_action_stream.cpp 
 
-                        ../src/cube.cpp 
-                        ../src/chunk.cpp 
-                        ../src/chunk_loader.cpp 
-                        ../src/world.cpp 
-                        ../src/blocks.cpp 
-                        ../src/automata.cpp 
-                        ../src/automata_ruleset.cpp 
+                        ../src/chunk/chunk.cpp 
+                        ../src/chunk/chunk_loader.cpp 
+                        ../src/chunk/blocks.cpp 
+                        ../src/world/world.cpp 
+                        ../src/world/world_gen.cpp 
+                        ../src/automata/automata.cpp 
+                        ../src/automata/automata_ruleset.cpp 
               )
 #==================================================
 # Linking

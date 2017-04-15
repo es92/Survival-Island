@@ -1,7 +1,7 @@
 
 #include "chunk_loader.h"
-#include "state.h"
-#include "constants.h"
+#include "../state.h"
+#include "../constants.h"
 
 #include <chrono>
 #include <thread>

@@ -5,7 +5,7 @@
 using std::priority_queue;
 
 #include "blocking_queue.h"
-#include "chunk_loader.h"
+#include "../chunk/chunk_loader.h"
 
 #include <vector>
 

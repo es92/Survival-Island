@@ -1,5 +1,5 @@
 
-#include "world.h"
+#include "../world/world.h"
 
 typedef struct Automata_ {
 
@@ -12,7 +12,7 @@ void step_automata(World& world, Automata& automata);
 using boost::unordered::unordered_map;
 
 #include <vector>
-#include "utils.h"
+#include "../utils/utils.h"
 using std::vector;
 using std::pair;
 

@@ -3,20 +3,19 @@
 
 #include <GL/glut.h>
 #include <vector>
-#include "cube.h"
-#include "chunk.h"
-#include "world.h"
+#include "chunk/chunk.h"
+#include "world/world.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "shader_utils.h"
-#include "utils.h"
-#include "automata.h"
+#include "utils/shader_utils.h"
+#include "utils/utils.h"
+#include "automata/automata.h"
 
-#include "chunk_loader.h"
-#include "async_chunk_action_stream.h"
+#include "chunk/chunk_loader.h"
+#include "utils/async_chunk_action_stream.h"
 
 #include <boost/unordered_map.hpp>
 using  boost::unordered::unordered_map;

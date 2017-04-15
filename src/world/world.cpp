@@ -1,20 +1,14 @@
 
 
 #include "world.h"
-#include "constants.h"
+#include "../constants.h"
 
-#include "timer.h"
+#include "../utils/timer.h"
 
 #include <cstdlib>
 #include <iostream>
 using namespace std;
 
-#define HILLS 0
-#define CUBE_FIELD 1
-#define SMALL_CUBE 2
-#define FIELD 3
-#define SEED 4
-#define ISLAND 5
 
 // =============================
 
@@ -91,65 +85,6 @@ void World_DB::set_block(World_Gen& gen, Block b, XYZ xyz){
     }
   }
   lock.unlock();
-}
-
-// =============================
-
-Block World_Gen::get_block(XYZ xyz){
-  int mode = ISLAND;
-  int x, y, z;
-  tie(x, y, z) = xyz;
-
-  int H = 3;
-
-  x /= 8;
-  z /= 8;
-
-  if (mode == ISLAND) {
-    bool land = (sqrt(x*x + z*z) < -y+H) && y > -(H+1);
-    if (land){
-      if (y == -1) {
-        return Sand_Block;
-      } else if (y == 0){
-        return Dirt_Block;
-      } else if (y == 1){
-        return Grass_Block;
-      } else {
-        return Stone_Block;
-      }
-    } else if (y < 0){
-      return Water_Block;
-    } else {
-      return Empty_Block;
-    }
-  } else {
-    bool exists;
-    if (mode == HILLS) {
-      x = (x + 64*1000000) % 128;
-      z = (z + 64*1000000) % 128;
-
-      x -= 64;
-      z -= 64;
-
-      x /= 4;
-      z /= 4;
-
-      exists = (x*x + z*z < -y+32 || y == -32) && y > -33;
-    } else if (mode == CUBE_FIELD) {
-      exists = (x % 4 == 0 && y % 4 == 0 && z % 4 == 0);
-    } else if (mode == SMALL_CUBE) {
-      exists = abs(x) < 4 && abs(y) < 4 && abs(z) < 4;
-    } else if (mode == FIELD) {
-      exists = (y < -3);
-    } else if (mode == SEED) {
-      exists = x == 1 && y == -1 && z == -6;
-    }
-    if (exists){
-      return Debug_Block;
-    } else {
-      return Empty_Block;
-    }
-  }
 }
 
 // =============================

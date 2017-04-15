@@ -11,8 +11,8 @@
 
 #include "display.h"
 #include "state.h"
-#include "utils.h"
-#include "timer.h"
+#include "utils/utils.h"
+#include "utils/timer.h"
 
 #include <fstream>
 #include <iostream>

@@ -5,9 +5,9 @@
 #include <GL/glut.h>
 #include "state.h"
 #include "display.h"
-#include "events.h"
-#include "utils.h"
-#include "timer.h"
+#include "utils/events.h"
+#include "utils/utils.h"
+#include "utils/timer.h"
 
 #include <SOIL/SOIL.h>
 #include <iostream>
@@ -21,7 +21,7 @@ using boost::unordered_set;
 #include <chrono>
 #include <thread>
 
-#include "chunk_loader.h"
+#include "chunk/chunk_loader.h"
 
 #include "constants.h"
 

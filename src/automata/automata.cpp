@@ -1,6 +1,6 @@
 
 #include "automata.h"
-#include "utils.h"
+#include "../utils/utils.h"
 
 #include <boost/unordered_map.hpp>
 #include <iostream>

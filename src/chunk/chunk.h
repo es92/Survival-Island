@@ -8,9 +8,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "shader_utils.h"
+#include "../utils/shader_utils.h"
 
-#include "world.h"
+#include "../world/world.h"
 
 #include <vector>
 using namespace std;

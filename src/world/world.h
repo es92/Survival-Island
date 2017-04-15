@@ -1,24 +1,17 @@
 #ifndef WORLD_
 #define WORLD_
 
-#include "utils.h"
+#include "../utils/utils.h"
+#include "world_gen.h"
 #include <boost/unordered_set.hpp>
 using boost::unordered_set;
 
 #include <boost/unordered_map.hpp>
 using  boost::unordered::unordered_map;
 
-#include "blocks.h"
+#include "../chunk/blocks.h"
 
 #include <shared_mutex>
-
-// =============================
-
-class World_Gen {
-  public:
-    World_Gen(){ };
-    Block get_block(XYZ xyz);
-};
 
 // =============================
 

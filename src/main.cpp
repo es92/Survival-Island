@@ -6,11 +6,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "shader_utils.h"
+#include "utils/shader_utils.h"
 
 #include "display.h"
 #include "main_loop.h"
-#include "events.h"
+#include "utils/events.h"
 
 #include <fstream>
 #include <iostream>

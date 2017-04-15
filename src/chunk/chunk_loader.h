@@ -1,7 +1,7 @@
 #ifndef CHUNK_LOADER_
 #define CHUNK_LOADER_
 
-#include "utils.h"
+#include "../utils/utils.h"
 #include "chunk.h"
 
 #include <boost/unordered_set.hpp>

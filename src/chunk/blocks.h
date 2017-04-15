@@ -1,3 +1,5 @@
+#ifndef BLOCKS_
+#define BLOCKS_
 
 #include <tuple>
 #include <array>
@@ -33,3 +35,5 @@ int water_block_level(const Block& b);
 int get_block_tex_x(Block b);
 int get_block_tex_y(Block b);
 float get_block_height(Block b);
+
+#endif
