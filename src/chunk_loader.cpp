@@ -14,11 +14,11 @@ using boost::unordered_set;
 #include <iostream>
 using namespace std;
 
-std::mutex chunk_loader_lock;
-
 void process_chunk_action_ress(){
-  Chunk_Action_Res* res;
-  while (state.chunk_action_ress.pop(res)){
+  vector<Chunk_Action_Res*> v = state.chunk_action_stream.multi_nowait_pop_res();
+
+  for (int i = 0; i < v.size(); i++){
+    Chunk_Action_Res* res = v[i];
     if (res->type() == Chunk_Action_Ress::Unload_Chunk_Res) {
       Unload_Chunk_Action_Res* u_res = static_cast<Unload_Chunk_Action_Res*>(res);
 
@@ -53,29 +53,26 @@ void process_chunk_action_ress(){
 
 void chunk_loader(void){
   while (true){
-    chunk_loader_lock.lock();
-    chunk_loader_lock.lock();
-    Chunk_Action_Req* req;
-    while (state.chunk_action_reqs.pop(req)){
-      if (req->type() == Chunk_Action_Reqs::Unload_Chunk_Req) {
-        Unload_Chunk_Action_Req* u_req = static_cast<Unload_Chunk_Action_Req*>(req);
+    pair<Chunk_Action_Req*, unsigned int> req = state.chunk_action_stream.pop_req();
 
-        state.chunk_action_ress.push(new Unload_Chunk_Action_Res(u_req->xyz));
+    if (req.first->type() == Chunk_Action_Reqs::Unload_Chunk_Req) {
+      Unload_Chunk_Action_Req* u_req = static_cast<Unload_Chunk_Action_Req*>(req.first);
 
-      // ==============================================================
-      } else if (req->type() == Chunk_Action_Reqs::Load_Chunk_Req) {
-        Load_Chunk_Action_Req* l_req = static_cast<Load_Chunk_Action_Req*>(req);
-        int x, y, z;
-        tie(x, y, z) = l_req->xyz;
+      state.chunk_action_stream.push_res(new Unload_Chunk_Action_Res(u_req->xyz), req.second);
 
-        Chunk* chunk = new Chunk;
-        init_chunk_cubes(*chunk, x, y, z, state.world);
-        state.chunk_action_ress.push(new Load_Chunk_Action_Res(l_req->xyz, *chunk));
-      }
+    // ==============================================================
+    } else if (req.first->type() == Chunk_Action_Reqs::Load_Chunk_Req) {
+      Load_Chunk_Action_Req* l_req = static_cast<Load_Chunk_Action_Req*>(req.first);
+      int x, y, z;
+      tie(x, y, z) = l_req->xyz;
 
-      delete req;
+      Chunk* chunk = new Chunk;
+      init_chunk_cubes(*chunk, x, y, z, state.world);
+
+      state.chunk_action_stream.push_res(new Load_Chunk_Action_Res(l_req->xyz, *chunk), req.second);
     }
-    chunk_loader_lock.unlock();
+
+    delete req.first;
   }
 }
 
@@ -85,11 +82,39 @@ void start_chunk_loader_thread(){
 }
 
 void load_all_chunks(){
-  int pcx = -snap_to_chunk(render_state.player_x);
-  int pcy = -snap_to_chunk(render_state.player_y);
-  int pcz = -snap_to_chunk(render_state.player_x);
+  static int pcx = -snap_to_chunk(render_state.player_x);
+  static int pcy = -snap_to_chunk(render_state.player_y);
+  static int pcz = -snap_to_chunk(render_state.player_z);
 
-  unordered_set<XYZ> xyzs_to_load;
+  static int px = render_state.player_x;
+  static int py = render_state.player_y;
+  static int pz = render_state.player_z;
+
+  struct dist_compare {
+    bool operator() (const XYZ& lhs, const XYZ& rhs) const{
+      int lx, ly, lz;
+      int rx, ry, rz;
+      tie(lx, ly, lz) = lhs;
+      tie(rx, ry, rz) = rhs;
+
+      double rd = sqrt(pow(rx - px, 2) + pow(ry - py, 2) + pow(rz - pz, 2));
+      double ld = sqrt(pow(lx - px, 2) + pow(ly - py, 2) + pow(lz - pz, 2));
+      if (rd != ld){
+        return ld < rd;
+      } else if (rx != lx){
+        return rx < lx;
+      } else if (ry != ly){
+        return ry < ly;
+      } else if (rz != lz){
+        return rz < lz;
+      } else {
+        return true;
+
+      }
+    }
+  };
+
+  set<XYZ, dist_compare> xyzs_to_load;
   for (int x = -render_state.render_dist; x <= render_state.render_dist; x++){
     for (int y = -render_state.render_dist; y <= render_state.render_dist; y++){
       for (int z = -render_state.render_dist; z <= render_state.render_dist; z++){
@@ -98,10 +123,9 @@ void load_all_chunks(){
     }
   }
 
-  for (unordered_set<XYZ>::iterator it=xyzs_to_load.begin(); it != xyzs_to_load.end(); it++){
-    state.chunk_action_reqs.push(new Load_Chunk_Action_Req(*it));
+  for (set<XYZ>::iterator it=xyzs_to_load.begin(); it != xyzs_to_load.end(); it++){
+    state.chunk_action_stream.push_req(new Load_Chunk_Action_Req(*it));
   }
-  chunk_loader_lock.unlock();
 }
 
 void set_chunks(bool player_moved_chunks, unordered_set<XYZ> changed_chunks){
@@ -168,19 +192,11 @@ void set_chunks(bool player_moved_chunks, unordered_set<XYZ> changed_chunks){
     }
   }
 
-  bool has_change = false;
-
   for (unordered_set<XYZ>::iterator it=xyzs_to_unload.begin(); it != xyzs_to_unload.end(); it++){
-    state.chunk_action_reqs.push(new Unload_Chunk_Action_Req(*it));
-    has_change = true;
+    state.chunk_action_stream.push_req(new Unload_Chunk_Action_Req(*it));
   }
 
   for (unordered_set<XYZ>::iterator it=xyzs_to_load.begin(); it != xyzs_to_load.end(); it++){
-    state.chunk_action_reqs.push(new Load_Chunk_Action_Req(*it));
-    has_change = true;
-  }
-
-  if (has_change){
-    chunk_loader_lock.unlock();
+    state.chunk_action_stream.push_req(new Load_Chunk_Action_Req(*it));
   }
 }

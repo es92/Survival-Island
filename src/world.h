@@ -10,6 +10,8 @@ using  boost::unordered::unordered_map;
 
 #include "blocks.h"
 
+#include <shared_mutex>
+
 // =============================
 
 class World_Gen {
@@ -31,6 +33,7 @@ class World_DB {
     void maybe_gen_chunk(World_Gen& gen, XYZ xyz);
     unordered_map<XYZ, Block> blocks;
     unordered_set<XYZ> initialized_chunks;
+    std::shared_timed_mutex lock;
 };
 
 // =============================

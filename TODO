@@ -5,7 +5,8 @@ bugs
 rendering
   simplify requests
     - don't load if load/unload later
-  multiple background threads (number requests, throw in mutexed priority queue, add to main thread queue if next)
+  reorg world db by chunks, use fuzzy-hash-lock
+  redraw by distance
   infinite distance
   look into instancing
 

@@ -144,7 +144,10 @@ void step() {
   unordered_set<XYZ> changed_chunks = get_changed_chunks(state.world);
 
   if (state.step == 0){
-    start_chunk_loader_thread();
+    int THREADS = 8;
+    for (int i = 0; i < THREADS; i++){
+      start_chunk_loader_thread();
+    }
     load_all_chunks();
   } else {
     bool player_moved_chunks = 

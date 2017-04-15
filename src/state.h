@@ -1,3 +1,5 @@
+#ifndef STATE_
+#define STATE_
 
 #include <GL/glut.h>
 #include <vector>
@@ -14,14 +16,13 @@
 #include "automata.h"
 
 #include "chunk_loader.h"
+#include "async_chunk_action_stream.h"
 
 #include <boost/unordered_map.hpp>
 using  boost::unordered::unordered_map;
 
 #include <boost/lockfree/spsc_queue.hpp>
 using boost::lockfree::spsc_queue;
-
-#include <vector>
 
 typedef struct State_ {
   long last_update_time;
@@ -36,10 +37,9 @@ typedef struct State_ {
   float last_player_y;
   float last_player_z;
 
-  int step;
+  Async_Chunk_Action_Stream chunk_action_stream;
 
-  spsc_queue<Chunk_Action_Res*, boost::lockfree::capacity<35937> > chunk_action_ress;
-  spsc_queue<Chunk_Action_Req*, boost::lockfree::capacity<35937> > chunk_action_reqs;
+  int step;
 
   World world;
   Automata automata;
@@ -80,4 +80,5 @@ extern State state;
 extern Display_Info display_info;
 extern Render_State render_state;
 
+#endif
 

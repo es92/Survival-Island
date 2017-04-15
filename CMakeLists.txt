@@ -64,6 +64,8 @@ add_executable(my_game
                         ../src/events.cpp
                         ../src/shader_utils.cpp 
 
+                        ../src/async_chunk_action_stream.cpp 
+
                         ../src/cube.cpp 
                         ../src/chunk.cpp 
                         ../src/chunk_loader.cpp 
@@ -75,4 +77,8 @@ add_executable(my_game
 #==================================================
 # Linking
 #==================================================
-target_link_libraries(my_game ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${Boost_LIBRARIES} ${SOIL_LIBRARY} )
+target_link_libraries(my_game ${OPENGL_LIBRARIES} 
+                              ${GLUT_LIBRARY} 
+                              ${Boost_LIBRARIES} 
+                              ${SOIL_LIBRARY} 
+                              ${CMAKE_THREAD_LIBS_INIT} )
