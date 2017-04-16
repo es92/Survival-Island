@@ -65,6 +65,7 @@ add_executable(my_game
                         ../src/utils/events.cpp
                         ../src/utils/shader_utils.cpp 
                         ../src/utils/async_chunk_action_stream.cpp 
+                        ../src/utils/lazy_diamond_square.cpp 
 
                         ../src/chunk/chunk.cpp 
                         ../src/chunk/chunk_loader.cpp 

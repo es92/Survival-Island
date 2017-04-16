@@ -6,6 +6,7 @@
 #include <utility>
 
 typedef std::tuple<int, int, int> XYZ;
+typedef std::tuple<int, int> XZ;
 
 long epoch_millis();
 double millis_diff_to_fps(long millis);

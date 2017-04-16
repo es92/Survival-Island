@@ -5,6 +5,8 @@
 
 using namespace std;
 
+Island_Height_Map ihm;
+
 Block fixed_get_block(XYZ xyz);
 
 // =============================
@@ -15,7 +17,7 @@ Block World_Gen::get_block(XYZ xyz){
   int x, y, z;
   tie(x, y, z) = xyz;
 
-  int height = height_map.get_height(xyz);
+  int height = height_map->get_height(x, z);
 
   if (height <= 0 && y <= 0){
     return Water_Block;
@@ -32,76 +34,70 @@ Block World_Gen::get_block(XYZ xyz){
 
 // =============================
 
-int Island_Height_Map::get_height(XYZ xyz){
-  int x, y, z;
-  tie(x, y, z) = xyz;
-
-  return 12 - 4*sqrt(x*x + z*z);
-}
-
-void midpoint_square(int H, vector<vector<int>>& g){
-  //TODO needs square neighbors too
-  g[H/2][H/2] = (g[0][0] + g[0][H-1] + g[H-1][0] + g[H-1][H-1])/4;
-
-  g[0][H/2] = (g[0][0] + g[0][H-1] + g[H/2][H/2])/3;
-  g[H/2][0] = (g[0][0] + g[H-1][0] + g[H/2][H/2])/3;
-  g[H-1][H/2] = (g[H-1][0] + g[H-1][H-1] + g[H/2][H/2])/3;
-  g[H/2][H-1] = (g[0][H-1] + g[H-1][H-1] + g[H/2][H/2])/3;
-}
-
-int Diamond_Square_Height_Map::get_height(XYZ xyz){
-  int x, y, z;
-  tie(x, y, z) = xyz;
-
-  int cx = snap_to_chunk(x);
-  int cz = snap_to_chunk(z);
-
-  XYZ cxcz({cx, 0, cz});
-  XYZ xz({x, 0, z});
-
-  if (initialized_height_chunks.find(cxcz) == initialized_height_chunks.end()){
-
-    //int r = rand() % 16;
-    int r00 = parent.get_height({ cx/CHUNK_SIZE, 0, cz/CHUNK_SIZE });
-    int r01 = parent.get_height({ cx/CHUNK_SIZE, 0, cz/CHUNK_SIZE+1 });
-    int r10 = parent.get_height({ cx/CHUNK_SIZE+1, 0, cz/CHUNK_SIZE });
-    int r11 = parent.get_height({ cx/CHUNK_SIZE+1, 0, cz/CHUNK_SIZE+1 });
-
-    int H = 17;
-
-    vector<vector<int>> heights;
-
-    for (int xi = 0; xi < H; xi++){
-      heights.push_back({});
-      for (int zi = 0; zi < H; zi++){
-        heights[xi].push_back(0);
-      }
-    }
-
-    heights[0][0] = r00;
-    heights[0][16] = r01;
-    heights[16][0] = r10;
-    heights[16][16] = r11;
-
-    midpoint_square(H, heights);
-
-    for (int xi = cx; xi < cx + CHUNK_SIZE; xi++){
-      for (int zi = cz; zi < cz + CHUNK_SIZE; zi++){
-
-        int h = heights[xi-cx][zi-cz];
-
-        XYZ xizi({ xi, 0, zi });
-        height_map.insert({ xizi, h });
-      }
-    }
-
-    initialized_height_chunks.insert(cxcz);
-  }
-
-  int height = height_map.find(xz)->second;
-
-  return height;
-}
+//
+//void midpoint_square(int H, vector<vector<int>>& g){
+//  //TODO needs square neighbors too
+//  g[H/2][H/2] = (g[0][0] + g[0][H-1] + g[H-1][0] + g[H-1][H-1])/4;
+//
+//  g[0][H/2] = (g[0][0] + g[0][H-1] + g[H/2][H/2])/3;
+//  g[H/2][0] = (g[0][0] + g[H-1][0] + g[H/2][H/2])/3;
+//  g[H-1][H/2] = (g[H-1][0] + g[H-1][H-1] + g[H/2][H/2])/3;
+//  g[H/2][H-1] = (g[0][H-1] + g[H-1][H-1] + g[H/2][H/2])/3;
+//}
+//
+//int Diamond_Square_Height_Map::get_height(XYZ xyz){
+//  int x, y, z;
+//  tie(x, y, z) = xyz;
+//
+//  int cx = snap_to_chunk(x);
+//  int cz = snap_to_chunk(z);
+//
+//  XYZ cxcz({cx, 0, cz});
+//  XYZ xz({x, 0, z});
+//
+//  if (initialized_height_chunks.find(cxcz) == initialized_height_chunks.end()){
+//
+//    //int r = rand() % 16;
+//    int r00 = parent.get_height({ cx/CHUNK_SIZE, 0, cz/CHUNK_SIZE });
+//    int r01 = parent.get_height({ cx/CHUNK_SIZE, 0, cz/CHUNK_SIZE+1 });
+//    int r10 = parent.get_height({ cx/CHUNK_SIZE+1, 0, cz/CHUNK_SIZE });
+//    int r11 = parent.get_height({ cx/CHUNK_SIZE+1, 0, cz/CHUNK_SIZE+1 });
+//
+//    int H = 17;
+//
+//    vector<vector<int>> heights;
+//
+//    for (int xi = 0; xi < H; xi++){
+//      heights.push_back({});
+//      for (int zi = 0; zi < H; zi++){
+//        heights[xi].push_back(0);
+//      }
+//    }
+//
+//    heights[0][0] = r00;
+//    heights[0][16] = r01;
+//    heights[16][0] = r10;
+//    heights[16][16] = r11;
+//
+//    midpoint_square(H, heights);
+//
+//    for (int xi = cx; xi < cx + CHUNK_SIZE; xi++){
+//      for (int zi = cz; zi < cz + CHUNK_SIZE; zi++){
+//
+//        int h = heights[xi-cx][zi-cz];
+//
+//        XYZ xizi({ xi, 0, zi });
+//        height_map.insert({ xizi, h });
+//      }
+//    }
+//
+//    initialized_height_chunks.insert(cxcz);
+//  }
+//
+//  int height = height_map.find(xz)->second;
+//
+//  return height;
+//}
 
 // =============================
 

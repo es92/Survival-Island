@@ -15,9 +15,13 @@
 #include <fstream>
 #include <iostream>
 
+#include "utils/lazy_diamond_square.h"
+
 using namespace std;
 
 int main(int argc, char **argv) {
+
+    //test_lazy_diamond_square();
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
