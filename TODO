@@ -19,5 +19,3 @@ automata
 looks
 
 world generation
-  height map
-    - diamond square, but noise as a function of scale (high noise if far apart, low noise if close together?)

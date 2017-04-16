@@ -9,16 +9,7 @@
 
 class World_Gen {
   public:
-    World_Gen(){
-      Island_Height_Map* ihm = new Island_Height_Map;
-
-      Height_Map* last = ihm;
-      for (int i = 0; i < 4; i++){
-        last = new Diamond_Square_Height_Map(*last);
-      }
-
-      height_map = last;
-    };
+    World_Gen();
     Block get_block(XYZ xyz);
   private:
     Height_Map* height_map;

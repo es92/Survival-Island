@@ -11,6 +11,21 @@ Block fixed_get_block(XYZ xyz);
 
 // =============================
 
+
+World_Gen::World_Gen(){
+  Island_Height_Map* ihm = new Island_Height_Map;
+
+  Height_Map* last = ihm;
+
+  last = new Diamond_Square_Height_Map(*last, 4.0);
+  last = new Diamond_Square_Height_Map(*last, 4.0);
+
+  last = new Diamond_Square_Height_Map(*last, 2.0);
+  last = new Diamond_Square_Height_Map(*last, 0.0);
+
+  height_map = last;
+};
+
 Block World_Gen::get_block(XYZ xyz){
   //return fixed_get_block(xyz);
 
@@ -21,6 +36,8 @@ Block World_Gen::get_block(XYZ xyz){
 
   if (height <= 0 && y <= 0){
     return Water_Block;
+  } else if (height == 1 && y == 1){
+    return Sand_Block;
   } else if (y == height){
     return Grass_Block;
   } else if (y == height - 1) {

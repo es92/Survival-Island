@@ -23,4 +23,10 @@ void print(Arg&& arg, Args&&... args)
     out << std::endl;
 }
 
+inline void wait_on_enter(){
+    std::string dummy;
+    std::cout << "Enter to continue..." << std::endl;
+    std::getline(std::cin, dummy);
+}
+
 #endif
